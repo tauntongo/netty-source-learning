@@ -6,12 +6,12 @@
 out
 gen
 
-### Maven
+# Maven
 *.mvn
 
-### Git
+# Git
 
-### Java template
+# Java template
 # Compiled class file
 *.class
 
