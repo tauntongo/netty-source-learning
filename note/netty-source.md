@@ -73,8 +73,8 @@ public class StartServerDemo {
 ```mermaid
 sequenceDiagram
 new Channel()->>init():then
-init()->>doBind():then
-doBind()->>register():then
+init()->>register():then
+register()->>doBind():then
 ```
 
 
@@ -94,7 +94,7 @@ doBind()->>register():then
     - ![2019-05-26-2.1-newSocket()](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-05-26-2.1-newSocket().png)
   - AbstractNioChannel()
     - AbstractChannel()：创建id，unsafe，pipeline
-    - SelectableChannel.configureBlocking(false)：阻塞模式
+    - SelectableChannel.configureBlocking(false)：jdk底层channel配置阻塞模式
     - ![2019-05-26-2.2-AbstractNioChannel()](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-05-26-2.2-AbstractNioChannel().png)
   - new NioServerSocketChannelConfig()：tcp参数配置类。通过ServerBootstrap.option()保存的参数最终会被设置到此配置对象中去
 
@@ -114,7 +114,7 @@ doBind()->>register():then
 - 具体初始化Channel流程
 
   - init()：初始化入口
-    - set ChannelOptions，set ChannelAttrs：将用户配置的参数&属性设置到NioServerSocketChannel中去
+    - set ChannelOptions，set ChannelAttrs：将业务代码中用户配置的参数&属性设置到NioServerSocketChannel中去
     - childGroup、childHandler、childOptions、childAttrs：获取到对请求Channel的各种配置，用来在后面第四步传入连接器中
     - config.handler()：配置服务端pipeline
     - add ServerBootstrapAcceptor：添加连接器（每次accept到SocketChannel后使用用户配置的childGroup、childHandler、childOptions、childAttrs作为其配置）
@@ -123,13 +123,48 @@ doBind()->>register():then
 
 ##### 注册到selector
 
-![2019-05-26-6注册selector](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-05-26-6注册selector.png)
+- 从外部用户代码进入到具体注册这一步
+
+  - ``` mermaid
+    sequenceDiagram
+    bind()[用户代码入口]->>initAndRegister()[初始化并注册]:then
+    initAndRegister()[初始化并注册]->>register()[将channel注册到selector]:then
+    ```
+
+  - 具体注册流程：
+
+    - AbstractChannel.register(channel)：入口
+      - this.eventLoop  =  eventLoop：绑定线程，服务端对请求的接收轮询就是在通过此线程进行的，因此eventLoop是netty的核心
+      - register0()：实际注册
+        - doRegister()：调用jdk底层注册
+        - invokeHandlerAddedIfNeeded()：回调执行handler中的handlerAdded(ChannelHandlerContext ctx)
+        - fireChannelRegistered()：传播事件，可以让如我们添加的自定义handler感知
+    - 部分源码流程：
+      - ![2019-06-02-01AbstractChanel.register](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-02-01AbstractChanel.register.png)
+      - ![2019-06-02-02-Abstractchannel.regist0](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-02-02-Abstractchannel.regist0.png)
+
+
+
 
 
 
 ##### 服务端口的绑定
 
-![2019-05-26-7-端口绑定](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-05-26-7-端口绑定.png)
+- 从外部用户代码进入到具体绑定这一步
+
+  - ``` mermaid
+    sequenceDiagram
+    bind()[用户代码入口]->>doBind0()[绑定并传播channelActive事件]:then
+    ```
+
+- 具体绑定步骤
+
+  - AbstractChannel.AbstractUnsafe.bind()：入口
+    - doBind()
+      - javaChannel().bind()：调用jdk底层nio接口ServerSocketChannel绑定端口
+    - pipeline.fireChannelActive()：传播channelActive事件
+  - 部分步骤源码：
+    - ![2019-06-04-01-bind](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-04-01-bind.png)
 
 # Chapter-04
 
