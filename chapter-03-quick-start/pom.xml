@@ -13,7 +13,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>chapter-03-create-channel</artifactId>
+    <artifactId>chapter-03-quick-start</artifactId>
+    <description>
+        一个简单的服务端创建&amp;
+        服务端启动时channel的创建&amp;
+        channel的初始化&amp;
+        channel注册到selector&amp;
+        端口绑定
+    </description>
 
 
     <dependencies>
