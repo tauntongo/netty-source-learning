@@ -6,7 +6,7 @@
 
 ### Netty的基本组件
 
-- NioEventLoop
+- NioEventLoop（核心）
   - Channel：netty自定义的Channel，是对nio中的Channel的进一步封装
   - Pipeline
   - ChannelHandler：每一次Channel需要进行数据处理就放出一个ChannelHandler来进行处理，我们可以创建多个ChannelHandler对象添加到Channel里面去，从而介入Channel的数据处理流程中去。我们的业务代码也写在这里面。
@@ -166,7 +166,51 @@ register()->>doBind():then
   - 部分步骤源码：
     - ![2019-06-04-01-bind](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-04-01-bind.png)
 
-# Chapter-04
+# Chapter-04(NioEventLoop)
+
+### 概述
+
+- NioEventLoop是Netty的核心组件，运行时一切活动都在NioEventLoop中进行
+
+### NioEventLoopGroup继承层级结构
+
+### NioEventLoop的继承层级结构
+
+
+
+### NioEventLoop创建
+
+- new **NioEventLoopGroup**(),默认创建cup核数*2个NioEventLoop，可在构造方法传入自定义
+  - 事件执行器-**EventExecutor**(即NioEventLoop，NioEventLoop是其实现类)数组
+    - new EventExecutor[nThreads]数组，长度默认cpu核数*2
+  - 任务执行器-**ThreadPerTaskExecutor**
+    -  执行存放在MpscQueue队列中中的Task
+    -  每次execute(Runnable command)执行任务时，都会创建一个线程实体（FastThreadLocalThread，继承了Thread，对ThreadLocal做了优化）
+    -  通过ThreadFactory来创建线程，每次创建一个NioEventLoopGroup对象时在NioEventLoopGroup的构造方法中会new 一个**DefaultThreadFactory**()传入到ThreadPerTaskExecutor构造方法中
+    -  创建的线程名称命名规则nioEventLoop-nioEventLoop在nioEventLoop-1-xx（1：声明创建NioEventLoopGroup对象的次序，每创建一次自增1，xx：在每个DefaultThreadFactory对象中每创建一个线程自增1）
+  - 创建NioEventLoop对象
+    - 循环前面创建的EventExecutor数组，通过newChild（threadPerTaskExecutor，args）创建出来的NioEventLoop对象赋值给每个数组元素
+    - newChild
+      - new NioEventLoop()
+        - 将前面创建的ThreadPerTaskExecutor对象赋值到NioEventLoop对象的executor变量
+        - 创建一个**MpscQueue**（Multi Producer Single Consumer Queue，多生产者单消费者，如果以服务端为主视角，那么服务端的NioEventLoop线程即Consumer，外部访问线程即Producer）队列，默认大小Integer.MAX_VALUE（可通过设置系统变量io.netty.eveltLoop.maxPendingTasks来自定义），赋值给NioEventLoop对象的taskQueue变量，这是一个优先队列PriorityQueue，NioEventLoop执行任务都是从此队列取
+        - 创建Selector：通过SelectProvider对象.openSelector()来获取一个选择器，赋值给NioEventLoop对象的selector变量
+  - 创建NioEventLoop选择器：chooserFactory.newChooser()，用来在有外部请求时从NioEventLoop数组中挑选一个NioEventLoop来处理请求
+    - isPowerOfTwo：NioEventLoop数组长度是否为2的n次幂，是则创建new PowerOfTwoEventExecutorChooser(executors)，否则创建new GenericEventExecutorChooser(executors)
+    - PowerOfTwoEventExecutorChooser选择NioEventLoop规则：index++ & (length-1)
+    - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
+
+### NioEventLoop启动
+
+### 三个问题
+
+1. 默认情况下Netty服务端启多少线程？何时启动？
+   1. 默认启动cpu核数*2个线程
+   2. 服务端启动绑定端口会启动一个NioEventLoop（在parentGroup中选）；新连接接入通过chooser绑定一个NioEventLoop（在childGroup中选）
+2. Netty是如何解决jdk空轮询bug的？
+3. Netty如何保证异步串行无锁化？
+
+
 
 # Chapter-05
 
