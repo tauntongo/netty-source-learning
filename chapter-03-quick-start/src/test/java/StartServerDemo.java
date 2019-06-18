@@ -55,7 +55,9 @@ public class StartServerDemo {
 
             //启动Netty服务端
             ChannelFuture channelFuture = b.bind(8848).sync();
+            System.out.println("bind port sync over");
             channelFuture.channel().closeFuture().sync();
+            System.out.println("channelFuture sync over");
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
