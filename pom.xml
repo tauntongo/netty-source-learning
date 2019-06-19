@@ -11,7 +11,7 @@
     <version>1.0.0</version>
     <description>netty源码解析学习</description>
     <modules>
-        <module>chapter-1-socket</module>
+        <module>chapter-01-socket</module>
         <!--netty基本组件介绍-->
         <module>chapter-02-component-introduction</module>
         <module>chapter-03-quick-start</module>
