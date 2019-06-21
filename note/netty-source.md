@@ -1,6 +1,6 @@
 # netty的应用
 
-- ![netty-applied-app](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\netty-applied-app.png)
+- ![netty-applied-app](img\netty-applied-app.png)
 
 # Chapter-02
 
