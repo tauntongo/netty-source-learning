@@ -138,7 +138,7 @@ register()->>doBind():then
       - register0()：实际注册
         - doRegister()：调用jdk底层注册
         - invokeHandlerAddedIfNeeded()：回调执行handler中的handlerAdded(ChannelHandlerContext ctx)
-        - fireChannelRegistered()：传播事件，可以让如我们添加的自定义handler感知
+        - fireChannelRegistered()：传播channel注册事件，可以让如我们添加的自定义handler感知
     - 部分源码流程：
       - ![2019-06-02-01AbstractChanel.register](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-02-01AbstractChanel.register.png)
       - ![2019-06-02-02-Abstractchannel.regist0](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-02-02-Abstractchannel.regist0.png)
@@ -176,6 +176,12 @@ register()->>doBind():then
 
 ### NioEventLoop的继承层级结构
 
+### NioEventLoop创建时序图
+
+### NioEventLoop启动运行时序图
+
+
+
 
 
 ### NioEventLoop创建
@@ -200,7 +206,44 @@ register()->>doBind():then
     - PowerOfTwoEventExecutorChooser选择NioEventLoop规则：index++ & (length-1)
     - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
 
-### NioEventLoop启动
+### NioEventLoop启动运行(for(;;))
+
+##### select()检测是否有IO事件（for(;;)）
+
+- 在进行阻塞式selector.select()之前，需要先进行几项校验判断
+  1. 校验设置的阻塞式select(timeoutMillis)的timeoutMillis是否小于0，小于0则break
+  2. 校验任务队列taskQueue是否为空，如果不为空则设置wakenUp为true（表示上一次select仍为唤醒状态，必须先处理完任务队列中的任务才能进行下一次阻塞式selector.select()），并break
+- 进行阻塞式select，int selectedKeys = selector.select(timeoutMillis)
+  - 判断是否满足以下几种情况之一则break
+    1. 监听到事件：selectedKeys不为0
+    2. select正处于唤醒状态：oldWakenUp或者wakenUp为true
+    3. 任务队列不为空：taskQueue不为空
+    4. 定时任务队列不为空：scheduleTaskQueue不为空
+- 判断线程是否被中断（Thread.interrupted()）,true则break，这是对一个issue fixed [issue 2426](// See https://github.com/netty/netty/issues/2426)
+- 防止空轮询
+  - 当满足以下两个条件时，就确认这一次select操作会一直是空轮询，然后rebuildSelector()（open一个新的selector替换掉NioEventLoop中的旧selector，然后将旧selector中注册的事件全部迁移注册到新的selector），然后break结束循环
+    1. 当前事件减去开始时间如果比select(timeoutMillis)的阻塞时间timeoutMillis小的话，说明了没有阻塞那么长时间，没有进行阻塞式select，这是一次空轮询；
+    2. 轮询的次数超过阈值SELECTOR_AUTO_REBUILD_THRESHOLD（默认512）
+
+##### processSelectedKeys()处理IO事件
+
+- 要处理IO事件，首先就先要拿到selectedKeys，说到selectedKeys，那就要看在前面创建NioEventLoop时，在openSelector()方法中对selectedKeys进行的初始化操作
+  - 在openSelector方法中netty会将jdk中Selector底层的Set<SelectionKey> selectedKeys = new HashSet<>()以及publicSelectedKeys（基本等同于selectedKeys）替换为netty自己实现的一个类对象
+  - netty自己实现的这个类**SelectedSelectionKeySet**继承AbstractSet，但是内部是通过数组实现的，为什么使用数组实现来替代HashSet实现呢？因为Selector底层对于selectedKeys只需要add操作，而不需要其他例如remove、contains、iterator实现，因此使用数组时的时间复杂度O(1)反而比使用HashSet实现时的时间复杂度O(n)低，性能更优
+  - 在替换之前先判断DISABLE_KEYSET_OPTIMIZATION（关闭keyset优化）静态常量是否为false（默认为false），不为false时openSelector则直接返回selector
+  - 通过反射的方式将选择器sun.nio.ch.SelectorImpl中的selectedKeys以及publicSelectedKeys这两个属性的值设置为netty自定义的SelectedSelectionKeySet对象
+  - 将netty自定义的SelectedSelectionKeySet对象一并赋给NioEventLoop的selectedKeys属性
+- processSelectedKeysOptimized(SelectionKey[] selectedKeyArr)
+  - 入参为selectedKeys.flip()，即所有此时监听到的事件
+  - processSelectedKey(SelectionKey,AbstractNioChannel)
+    - 如果SelectionKey是非法的，关闭掉此channel：unsafe.close(unsafe.voidPromise());
+    - 判断SelectionKey中监听到的是哪种事件（boss NioEventLoopGroup监听到的是ACCEPT事件，worker NioEventLoopGroup监听到的是READ事件）并进行处理
+
+##### 处理异步任务队列
+
+
+
+
 
 ### 三个问题
 
@@ -208,7 +251,15 @@ register()->>doBind():then
    1. 默认启动cpu核数*2个线程
    2. 服务端启动绑定端口会启动一个NioEventLoop（在parentGroup中选）；新连接接入通过chooser绑定一个NioEventLoop（在childGroup中选）
 2. Netty是如何解决jdk空轮询bug的？
+   1. 通过检查阻塞式select是否阻塞了传入的超时时间那么长，如果没有阻塞对应的超时时间那么长且轮询的次数超过设置的阈值SELECTOR_AUTO_REBUILD_THRESHOLD（默认512），此时就会rebuildSelector然后break循环
 3. Netty如何保证异步串行无锁化？
+
+
+
+### 本章疑问？
+
+1. NioChannel中的Unsafe是什么？与NioChannel有何关系？有何作用？
+2. NioChannel中的Pipeline是什么？与NioChannel有何关系？有何作用？
 
 
 
