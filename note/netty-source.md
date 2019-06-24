@@ -40,7 +40,7 @@ public class StartServerDemo {
                     //对accept到的SocketChannel的属性设置，每次accept到SocketChannel都会按照我们所传的属性设置一遍
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
                     //对NioServerSocketChannel的处理介入，这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
-                    .handler(new ServerHandler())
+                    .handler(new ServerChannelInboundHandler())
                     //对accept到的SocketChannel处理介入,我们如果要写业务代码一般也就是写在handler里面了
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
@@ -174,9 +174,15 @@ register()->>doBind():then
 
 ### NioEventLoopGroup继承层级结构
 
+- ![NioEventLoopGroup类图](map-img/NioEventLoopGroup类图.png)
+
 ### NioEventLoop的继承层级结构
 
+- ![NioEventLoop类图](map-img/NioEventLoop类图.png)
+
 ### NioEventLoop创建时序图
+
+- ![NioEventLoop创建流程图](map-img/NioEventLoop创建流程.png)
 
 ### NioEventLoop启动运行时序图
 
@@ -187,28 +193,31 @@ register()->>doBind():then
 ### NioEventLoop创建
 
 - new **NioEventLoopGroup**(),默认创建cup核数*2个NioEventLoop，可在构造方法传入自定义
-  - 事件执行器-**EventExecutor**(即NioEventLoop，NioEventLoop是其实现类)数组
-    - new EventExecutor[nThreads]数组，长度默认cpu核数*2
-  - 任务执行器-**ThreadPerTaskExecutor**
-    -  执行存放在MpscQueue队列中中的Task
-    -  每次execute(Runnable command)执行任务时，都会创建一个线程实体（FastThreadLocalThread，继承了Thread，对ThreadLocal做了优化）
-    -  通过ThreadFactory来创建线程，每次创建一个NioEventLoopGroup对象时在NioEventLoopGroup的构造方法中会new 一个**DefaultThreadFactory**()传入到ThreadPerTaskExecutor构造方法中
-    -  创建的线程名称命名规则nioEventLoop-nioEventLoop在nioEventLoop-1-xx（1：声明创建NioEventLoopGroup对象的次序，每创建一次自增1，xx：在每个DefaultThreadFactory对象中每创建一个线程自增1）
-  - 创建NioEventLoop对象
-    - 循环前面创建的EventExecutor数组，通过newChild（threadPerTaskExecutor，args）创建出来的NioEventLoop对象赋值给每个数组元素
-    - newChild
-      - new NioEventLoop()
-        - 将前面创建的ThreadPerTaskExecutor对象赋值到NioEventLoop对象的executor变量
-        - 创建一个**MpscQueue**（Multi Producer Single Consumer Queue，多生产者单消费者，如果以服务端为主视角，那么服务端的NioEventLoop线程即Consumer，外部访问线程即Producer）队列，默认大小Integer.MAX_VALUE（可通过设置系统变量io.netty.eveltLoop.maxPendingTasks来自定义），赋值给NioEventLoop对象的taskQueue变量，这是一个优先队列PriorityQueue，NioEventLoop执行任务都是从此队列取
-        - 创建Selector：通过SelectProvider对象.openSelector()来获取一个选择器，赋值给NioEventLoop对象的selector变量
-  - 创建NioEventLoop选择器：chooserFactory.newChooser()，用来在有外部请求时从NioEventLoop数组中挑选一个NioEventLoop来处理请求
-    - isPowerOfTwo：NioEventLoop数组长度是否为2的n次幂，是则创建new PowerOfTwoEventExecutorChooser(executors)，否则创建new GenericEventExecutorChooser(executors)
-    - PowerOfTwoEventExecutorChooser选择NioEventLoop规则：index++ & (length-1)
-    - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
+  1. 创建事件执行器-**EventExecutor**(即NioEventLoop，NioEventLoop是其实现类)数组
+     - new EventExecutor[nThreads]数组，长度默认cpu核数*2
+  
+  2. 创建任务执行器-**ThreadPerTaskExecutor**
+     - 用来执行存放在taskQueue队列中中的Task
+     - 每次execute(Runnable command)执行任务时，都会创建一个线程实体（FastThreadLocalThread，继承了Thread，对ThreadLocal做了优化）
+     - 通过ThreadFactory来创建线程，每次创建一个NioEventLoopGroup对象时在NioEventLoopGroup的构造方法中会new 一个**DefaultThreadFactory**()传入到ThreadPerTaskExecutor构造方法中
+     - 创建的线程名称命名规则nioEventLoop-nioEventLoop在nioEventLoop-1-xx（1：声明创建NioEventLoopGroup对象的次序，每创建一次自增1，xx：在每个DefaultThreadFactory对象中每创建一个线程自增1）
+  
+  3. 创建NioEventLoop对象
+     - 循环前面创建的EventExecutor数组，通过newChild（threadPerTaskExecutor，args）创建出来的NioEventLoop对象赋值给每个数组元素
+     - **newChild**
+       - new NioEventLoop()
+         - 将前面创建的ThreadPerTaskExecutor对象赋值到NioEventLoop对象的executor变量
+         - 创建一个**MpscQueue**（Multi Producer Single Consumer Queue，多生产者单消费者，如果以服务端为主视角，那么服务端的NioEventLoop线程即Consumer，外部访问线程即Producer）队列，默认大小Integer.MAX_VALUE（可通过设置系统变量io.netty.eveltLoop.maxPendingTasks来自定义），赋值给NioEventLoop对象的taskQueue变量，这是一个优先队列PriorityQueue，NioEventLoop执行任务都是从此队列取
+         - 创建Selector：通过SelectProvider对象.openSelector()来获取一个选择器，赋值给NioEventLoop对象的selector变量
+  
+  4. 创建NioEventLoop选择器：chooserFactory.newChooser()，用来在有外部请求时从NioEventLoop数组中挑选一个NioEventLoop来处理请求
+     - isPowerOfTwo：NioEventLoop数组长度是否为2的n次幂，是则创建new PowerOfTwoEventExecutorChooser(executors)，否则创建new GenericEventExecutorChooser(executors)
+     - PowerOfTwoEventExecutorChooser选择NioEventLoop规则：index++ & (length-1)
+     - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
 
 ### NioEventLoop启动运行(for(;;))
 
-##### select()检测是否有IO事件（for(;;)）
+##### 检测是否有IO事件（for(;;)）-select()
 
 - 在进行阻塞式selector.select()之前，需要先进行几项校验判断
   1. 校验设置的阻塞式select(timeoutMillis)的timeoutMillis是否小于0，小于0则break
@@ -225,7 +234,7 @@ register()->>doBind():then
     1. 当前事件减去开始时间如果比select(timeoutMillis)的阻塞时间timeoutMillis小的话，说明了没有阻塞那么长时间，没有进行阻塞式select，这是一次空轮询；
     2. 轮询的次数超过阈值SELECTOR_AUTO_REBUILD_THRESHOLD（默认512）
 
-##### processSelectedKeys()处理IO事件
+##### 处理IO事件-processSelectedKeys()
 
 - 要处理IO事件，首先就先要拿到selectedKeys，说到selectedKeys，那就要看在前面创建NioEventLoop时，在openSelector()方法中对selectedKeys进行的初始化操作
   - 在openSelector方法中netty会将jdk中Selector底层的Set<SelectionKey> selectedKeys = new HashSet<>()以及publicSelectedKeys（基本等同于selectedKeys）替换为netty自己实现的一个类对象
@@ -237,11 +246,20 @@ register()->>doBind():then
   - 入参为selectedKeys.flip()，即所有此时监听到的事件
   - processSelectedKey(SelectionKey,AbstractNioChannel)
     - 如果SelectionKey是非法的，关闭掉此channel：unsafe.close(unsafe.voidPromise());
-    - 判断SelectionKey中监听到的是哪种事件（boss NioEventLoopGroup监听到的是ACCEPT事件，worker NioEventLoopGroup监听到的是READ事件）并进行处理
+    - 判断SelectionKey中监听到的是哪种事件（boss NioEventLoopGroup监听到的是ACCEPT事件，worker NioEventLoopGroup监听到的是READ事件）并进行相应处理
 
-##### 处理异步任务队列
+##### 处理异步任务队列-runAllTasks(long timeoutNanos)
 
-
+1. fetchFromScheduledTaskQueue()
+   - 合并定时任务队列与普通任务队列：将定时任务队列scheduledTaskQueue（类型为PriorityQueue）中的到了定时时间的任务取出来移除并添加到普通任务队列taskQueue（MpscQueue）中去
+   - 如果想要向定时任务队列中添加任务，我们需要通过先向普通任务队列中添加一个任务，在这个任务中再向定时任务队列中添加任务；为什么这样做？因为定时任务队列类型PriorityQueue是非线程安全的，而执行普通任务队列可以保证异步串行执行无锁化，从而达到线程安全
+2. 执行task
+   - 死循环
+     - 从taskQueue队列中取出task执行
+     - 每循环64次检查一遍runAllTasks是否超时，超时则break
+     - 检查从taskQueue队列中取出的是否为空，为空则break
+3. afterRunningAllTasks()：执行tailTasks队列中的所有任务
+4. this.lastExecutionTIme = lastExecutionTime：保存任务最后执行时间
 
 
 
@@ -253,6 +271,7 @@ register()->>doBind():then
 2. Netty是如何解决jdk空轮询bug的？
    1. 通过检查阻塞式select是否阻塞了传入的超时时间那么长，如果没有阻塞对应的超时时间那么长且轮询的次数超过设置的阈值SELECTOR_AUTO_REBUILD_THRESHOLD（默认512），此时就会rebuildSelector然后break循环
 3. Netty如何保证异步串行无锁化？
+   1. 通过将所有的操作包装成一个个task添加到任务队列，然后再依次执行任务队列中的任务，从而保证了异步串行无锁化
 
 
 
