@@ -282,7 +282,36 @@ register()->>doBind():then
 
 
 
-# Chapter-05
+# Chapter-05(新连接接入)
+
+### 接入处理逻辑概述
+
+1. 检测新连接
+2. 创建NioSocketChannel
+3. 分配NioEventLoop及注册selector
+4. 向selector注册读（OP_READ）事件
+
+### 检测新连接
+
+### 创建NioSocketChannel
+
+- new NioSocketChannel(parent, ch)
+  - 入参parent为服务端channel NioServerSocketChannel，ch为服务端jdk-channel accept之后获取到得到客户端channel
+  - 初始化成员变量
+    - Channel parent = parent
+    - ChannelId id = newId()
+    - Unsafe unsafe = newUnsafe()
+    - DefaultChannelPipeline pipeline = newChannelPipeline()
+    - SelectedableChannel ch = ch
+    - int readInterestOp = OP_READ;保存要监听的事件
+  - 配置channel为非阻塞模式：ch.configureBlocking(false)
+  - 禁止Nagle算法
+    - Nagle算法：尽量将小的数据包集合成大的数据包发送出去，这是jdk底层的
+    - Netty为了及时将数据发送出去，降低延迟，禁止了Nagle算法
+    - SocketChannelConfig config = new SocketChannelConfig(NioSocketChannnel channel, Socket javaSocket)
+      - setTcpNoDelay(true)
+
+
 
 # Chapter-06
 
