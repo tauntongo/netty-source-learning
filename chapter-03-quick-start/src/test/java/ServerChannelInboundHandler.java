@@ -11,7 +11,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * @Author <a href="mailto:tangduns945@gmail.com">Taunton</a>
  * @Date Created in 2019-05-26 16:39
  */
-public class ServerHandler extends ChannelInboundHandlerAdapter {
+public class ServerChannelInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext context){

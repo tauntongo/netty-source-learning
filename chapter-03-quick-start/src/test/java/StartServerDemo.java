@@ -25,8 +25,8 @@ public class StartServerDemo {
 
     @Test
     public void server(){
-        EventLoopGroup serverGroup = new NioEventLoopGroup(1);
-        EventLoopGroup childGroup = new NioEventLoopGroup();
+        final EventLoopGroup serverGroup = new NioEventLoopGroup(1);
+        final EventLoopGroup childGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(serverGroup,childGroup)
@@ -42,7 +42,7 @@ public class StartServerDemo {
                     //对accept到的SocketChannel的属性设置，每次accept到SocketChannel都会按照我们所传的属性设置一遍
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
                     //对NioServerSocketChannel的处理介入，这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
-                    .handler(new ServerHandler())
+                    .handler(new ServerChannelInboundHandler())
                     //对accept到的SocketChannel处理介入,我们如果要写业务代码一般也就是写在handler里面了
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {

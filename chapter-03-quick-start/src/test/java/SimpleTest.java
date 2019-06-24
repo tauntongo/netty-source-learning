@@ -3,10 +3,14 @@
  */
 
 import io.netty.channel.nio.NioEventLoop;
+import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 
 /**
  * <p></p>
@@ -42,6 +46,39 @@ public class SimpleTest {
         Class<SimpleTest> simpleTestClass = SimpleTest.class;
         boolean assignableFrom = simpleTestClass.isAssignableFrom(SimpleTest.class);
     }
+
+    @Test
+    public void testDecimal(){
+        int sixteen = Integer.parseInt("3f", 16);
+        System.out.println(sixteen);
+    }
+
+    @Test
+    public void testMpscQueue(){
+        Queue<Runnable> runnableQueue = PlatformDependent.newMpscQueue(3);
+        List<Runnable> list = new ArrayList<>();
+        list.add(() -> {
+            System.out.println("runnable task 1");
+        });
+        list.add(() -> {
+            System.out.println("runnable task 2");
+        });
+        list.add(() -> {
+            System.out.println("runnable task 3");
+        });
+        boolean add = runnableQueue.add(() -> {
+            System.out.println("runnable task 4");
+        });
+        System.out.println(add);
+        //boolean offer = runnableQueue.offer(() -> {
+        //    System.out.println("runnable task 4");
+        //});
+        //System.out.println(offer);
+
+
+    }
+
+
 
     // 'wakenUp.compareAndSet(false, true)' is always evaluated
     // before calling 'selector.wakeup()' to reduce the wake-up
