@@ -308,10 +308,7 @@ register()->>doBind():then
         - channelConfig.isAutoRead()：默认为true
         - totalMessages本次read累计接入的连接数小于每次read允许的最大接入连接数maxMessagePerRead（默认16）
         - 其余两个条件不重要
-
-
-
-
+    - 传播事件fireChannelRead（accept到新连接有多少个就传播多少次）以及fireChannelReadComplete(一次)
 
 ### 创建NioSocketChannel
 
@@ -332,6 +329,35 @@ register()->>doBind():then
     - Netty为了及时将数据发送出去，降低延迟，禁止了Nagle算法
     - SocketChannelConfig config = new SocketChannelConfig(NioSocketChannnel channel, Socket javaSocket)
       - setTcpNoDelay(true)
+  
+- 思考：为什么服务端channel NioServerSocketChannel通过反射的方式创建而客户端Chanel NioSocketChanel确实通过new 构造函数的方式直接创建？
+
+  1. 因为服务端chanel需要可以指定配置channel实现类class来创建不同类型的服务端channle对象
+
+  2. 因为通过反射创建速度较慢，而服务端channel是在服务启动的时候创建的，所以不关心速度问题；
+
+     客户端channel创建需要响应速度，因此直接通过构造函数的方式创建
+
+### Channel的分类
+
+- 
+
+
+
+### 新连接分配NioEventLoop与selector注册
+
+### NioSocketChannel读事件的注册
+
+
+
+
+
+### 两个问题
+
+1. Netty是在哪里检测有新连接接入的？
+   1. 在boss线程检测到IO事件之后的处理IO事件中检测是否有新连接接入
+2. 新连接是怎样注册到NioEventLoop线程的？
+   1. 通过chooser选择一个NioEventLoop，然后将客户端channel注册到该NioEventLoop中的selector选择器中
 
 
 
