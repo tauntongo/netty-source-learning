@@ -7,6 +7,7 @@ import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
 import org.junit.Test;
 
+import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -74,9 +75,14 @@ public class SimpleTest {
         //    System.out.println("runnable task 4");
         //});
         //System.out.println(offer);
-
-
     }
+
+    @Test
+    public void testNegate(){
+        int i = ~SelectionKey.OP_CONNECT;
+        System.out.println(i);
+    }
+
 
 
 

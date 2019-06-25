@@ -91,11 +91,11 @@ register()->>doBind():then
 - 具体创建的流程
 
   - newSocket()：通过jdk来创建底层jdk channel
-    - ![2019-05-26-2.1-newSocket()](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-05-26-2.1-newSocket().png)
+    - ![2019-05-26-2.1-newSocket()](img\2019-05-26-2.1-newSocket().png)
   - AbstractNioChannel()
     - AbstractChannel()：创建id，unsafe，pipeline
     - SelectableChannel.configureBlocking(false)：jdk底层channel配置阻塞模式
-    - ![2019-05-26-2.2-AbstractNioChannel()](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-05-26-2.2-AbstractNioChannel().png)
+    - ![2019-05-26-2.2-AbstractNioChannel()](img\2019-05-26-2.2-AbstractNioChannel().png)
   - new NioServerSocketChannelConfig()：tcp参数配置类。通过ServerBootstrap.option()保存的参数最终会被设置到此配置对象中去
 
 
@@ -119,7 +119,7 @@ register()->>doBind():then
     - config.handler()：配置服务端pipeline
     - add ServerBootstrapAcceptor：添加连接器（每次accept到SocketChannel后使用用户配置的childGroup、childHandler、childOptions、childAttrs作为其配置）
     - 源码：
-      - ![2019-05-27-1-ServerBootstrap.init()](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-05-27-1-ServerBootstrap.init().png)
+      - ![2019-05-27-1-ServerBootstrap.init()](img\2019-05-27-1-ServerBootstrap.init().png)
 
 ##### 注册到selector
 
@@ -140,8 +140,8 @@ register()->>doBind():then
         - invokeHandlerAddedIfNeeded()：回调执行handler中的handlerAdded(ChannelHandlerContext ctx)
         - fireChannelRegistered()：传播channel注册事件，可以让如我们添加的自定义handler感知
     - 部分源码流程：
-      - ![2019-06-02-01AbstractChanel.register](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-02-01AbstractChanel.register.png)
-      - ![2019-06-02-02-Abstractchannel.regist0](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-02-02-Abstractchannel.regist0.png)
+      - ![2019-06-02-01AbstractChanel.register](img\2019-06-02-01AbstractChanel.register.png)
+      - ![2019-06-02-02-Abstractchannel.regist0](img\2019-06-02-02-Abstractchannel.regist0.png)
 
 
 
@@ -164,7 +164,7 @@ register()->>doBind():then
       - javaChannel().bind()：调用jdk底层nio接口ServerSocketChannel绑定端口
     - pipeline.fireChannelActive()：传播channelActive事件
   - 部分步骤源码：
-    - ![2019-06-04-01-bind](D:\software\dev\java\learn\netty\netty-source-analysis-learning-sample\note\img\2019-06-04-01-bind.png)
+    - ![2019-06-04-01-bind](img\2019-06-04-01-bind.png)
 
 # Chapter-04(NioEventLoop)
 
@@ -215,9 +215,9 @@ register()->>doBind():then
      - PowerOfTwoEventExecutorChooser选择NioEventLoop规则：index++ & (length-1)
      - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
 
-### NioEventLoop启动运行(for(;;))
+### NioEventLoop启动运行(for(;;)循环)
 
-##### 检测是否有IO事件（for(;;)）-select()
+##### 检测是否有IO事件（for(;;)循环）-select()
 
 - 在进行阻塞式selector.select()之前，需要先进行几项校验判断
   1. 校验设置的阻塞式select(timeoutMillis)的timeoutMillis是否小于0，小于0则break
@@ -242,11 +242,12 @@ register()->>doBind():then
   - 在替换之前先判断DISABLE_KEYSET_OPTIMIZATION（关闭keyset优化）静态常量是否为false（默认为false），不为false时openSelector则直接返回selector
   - 通过反射的方式将选择器sun.nio.ch.SelectorImpl中的selectedKeys以及publicSelectedKeys这两个属性的值设置为netty自定义的SelectedSelectionKeySet对象
   - 将netty自定义的SelectedSelectionKeySet对象一并赋给NioEventLoop的selectedKeys属性
-- processSelectedKeysOptimized(SelectionKey[] selectedKeyArr)
-  - 入参为selectedKeys.flip()，即所有此时监听到的事件
-  - processSelectedKey(SelectionKey,AbstractNioChannel)
-    - 如果SelectionKey是非法的，关闭掉此channel：unsafe.close(unsafe.voidPromise());
-    - 判断SelectionKey中监听到的是哪种事件（boss NioEventLoopGroup监听到的是ACCEPT事件，worker NioEventLoopGroup监听到的是READ事件）并进行相应处理
+- processSelectedKeysOptimized(SelectionKey[] selectedKeyArr)：处理优化后的SelectedSelectionKeys
+  - 入参为selectedKeys.flip()的返回值，即所有此时监听到的事件
+    - 轮询入参 SelectionKey[]数组-for(;;)循环
+      - processSelectedKey(SelectionKey,AbstractNioChannel)
+        - 如果SelectionKey是非法的（！k.isValid()），关闭掉此channel：unsafe.close(unsafe.voidPromise());
+        - 判断SelectionKey中监听到的是哪种事件（boss NioEventLoopGroup一般监听到的是ACCEPT事件，worker NioEventLoopGroup一般监听到的是READ事件）并进行相应处理（OP_ACCEPT：进行chapter-05新连接接入，OP_READ：进行数据读取）
 
 ##### 处理异步任务队列-runAllTasks(long timeoutNanos)
 
@@ -254,7 +255,7 @@ register()->>doBind():then
    - 合并定时任务队列与普通任务队列：将定时任务队列scheduledTaskQueue（类型为PriorityQueue）中的到了定时时间的任务取出来移除并添加到普通任务队列taskQueue（MpscQueue）中去
    - 如果想要向定时任务队列中添加任务，我们需要通过先向普通任务队列中添加一个任务，在这个任务中再向定时任务队列中添加任务；为什么这样做？因为定时任务队列类型PriorityQueue是非线程安全的，而执行普通任务队列可以保证异步串行执行无锁化，从而达到线程安全
 2. 执行task
-   - 死循环
+   - for(;;) 死循环
      - 从taskQueue队列中取出task执行
      - 每循环64次检查一遍runAllTasks是否超时，超时则break
      - 检查从taskQueue队列中取出的是否为空，为空则break
@@ -293,7 +294,28 @@ register()->>doBind():then
 
 ### 检测新连接
 
+- processSelectedKey(SelectionKey k, AbstractNioChannel ch)：是对chapter-04中处理IO事件循环的单次处理
+  - 监听到OP_ACCEPT事件，进行相应处理：AbstractNioMessageChannel.NioMessageUnsafe.read()
+    - RecvByteBufAllocator.Handler allocHandler = unsafe.recvBufAllocHandle();：用来控制每次read()可以接入的连接数
+    - do...while循环：
+      - 循环体：
+        - doReadMessages(List<Object> buf)：通过jdk底层ServerSocketChannel来accept新连接并将获取到的jdk SocketChanel包装成netty自定义的NioSocketChannel
+          - ch = javaChannel.accept()
+          - new NioSocketChannel(this, ch)：this即NioServerSocketChannel
+        - 如果doREadMessages返回的accept到的连接数小于0
+        - allocHandler累加每次循环中doReadMessages()返回的accept到的连接数，totalMessages
+      - 条件：allocHandler.continueReading()，同时满足以下四个条件
+        - channelConfig.isAutoRead()：默认为true
+        - totalMessages本次read累计接入的连接数小于每次read允许的最大接入连接数maxMessagePerRead（默认16）
+        - 其余两个条件不重要
+
+
+
+
+
 ### 创建NioSocketChannel
+
+- 接上一步检测新连接中do...while循环体中的的doReadMessages中的new NioSocketChannel操作
 
 - new NioSocketChannel(parent, ch)
   - 入参parent为服务端channel NioServerSocketChannel，ch为服务端jdk-channel accept之后获取到得到客户端channel
