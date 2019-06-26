@@ -1,6 +1,6 @@
 # netty的应用
 
-- ![netty-applied-app](img\netty-applied-app.png)
+- ![netty-applied-app](img\netty-pplied-app.png)
 
 # Chapter-02
 
@@ -115,8 +115,8 @@ register()->>doBind():then
 
   - init()：初始化入口
     - set ChannelOptions，set ChannelAttrs：将业务代码中用户配置的参数&属性设置到NioServerSocketChannel中去
-    - childGroup、childHandler、childOptions、childAttrs：获取到对请求Channel的各种配置，用来在后面第四步传入连接器中
-    - config.handler()：配置服务端pipeline
+    - pipeline.addLast(handler)：将用户配置的服务端handler加入pipeline处理逻辑链
+    - childGroup、childHandler、childOptions、childAttrs：获取到对客户端Channel的各种配置，用来在后面第四步传入连接器中；childOptions主要是和弟底层tcp读写相关的配置，childAttrs主要是为了可以在channel上绑定一些自定义的属性，如该chanel的秘钥、存活时间之类的
     - add ServerBootstrapAcceptor：添加连接器（每次accept到SocketChannel后使用用户配置的childGroup、childHandler、childOptions、childAttrs作为其配置）
     - 源码：
       - ![2019-05-27-1-ServerBootstrap.init()](img\2019-05-27-1-ServerBootstrap.init().png)
@@ -197,7 +197,7 @@ register()->>doBind():then
      - new EventExecutor[nThreads]数组，长度默认cpu核数*2
   
   2. 创建任务执行器-**ThreadPerTaskExecutor**
-     - 用来执行存放在taskQueue队列中中的Task
+     - **用来启动线程，在这个线程中来启动运行NioEventLoop（SingleThreadEventExecutor.this.run()）**，并且将启动的这个线程绑定到NioEventLoop中（NioEventLoop的thread属性）
      - 每次execute(Runnable command)执行任务时，都会创建一个线程实体（FastThreadLocalThread，继承了Thread，对ThreadLocal做了优化）
      - 通过ThreadFactory来创建线程，每次创建一个NioEventLoopGroup对象时在NioEventLoopGroup的构造方法中会new 一个**DefaultThreadFactory**()传入到ThreadPerTaskExecutor构造方法中
      - 创建的线程名称命名规则nioEventLoop-nioEventLoop在nioEventLoop-1-xx（1：声明创建NioEventLoopGroup对象的次序，每创建一次自增1，xx：在每个DefaultThreadFactory对象中每创建一个线程自增1）
@@ -216,6 +216,9 @@ register()->>doBind():then
      - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
 
 ### NioEventLoop启动运行(for(;;)循环)
+
+- 从哪里启动？
+  - 在调用NioEventLoop.execute(task)执行任务时，首先判断是否inEventLoop()（NioEventLoop.thread == Thread.currentThread()），如果false，则startThread()（如果该NioEventLoop已绑定过thread则不再进行以下步骤）通过ThreadPerTaskExecutor启动一个线程，在线程中再SingleThreadEventExecutor.run()启动运行NioEventLoop，并在这个线程中将这个线程绑定到NioEventLoop（thread = Thread.currentThread()）
 
 ##### 检测是否有IO事件（for(;;)循环）-select()
 
@@ -256,7 +259,7 @@ register()->>doBind():then
    - 如果想要向定时任务队列中添加任务，我们需要通过先向普通任务队列中添加一个任务，在这个任务中再向定时任务队列中添加任务；为什么这样做？因为定时任务队列类型PriorityQueue是非线程安全的，而执行普通任务队列可以保证异步串行执行无锁化，从而达到线程安全
 2. 执行task
    - for(;;) 死循环
-     - 从taskQueue队列中取出task执行
+     - 从taskQueue队列中取出task执行，task.run()（等于是直接执行Runnable的run方法）
      - 每循环64次检查一遍runAllTasks是否超时，超时则break
      - 检查从taskQueue队列中取出的是否为空，为空则break
 3. afterRunningAllTasks()：执行tailTasks队列中的所有任务
@@ -340,7 +343,17 @@ register()->>doBind():then
 
 ### Channel的分类
 
-- 
+- channel总的来说可以分为两大类：客户端channel、服务端channel
+- 不同点
+  - 在selector中监听的事件不同
+  - Unsafe不同：Unsafe主要用于实现每一种channel的读写抽象
+    - 客户端channel中，“read”是指读取IO数据
+    - 服务端channel中，“read"是指获取新连接
+  - ChannelConfig不同
+- 相同
+  - Pipeline：负责处理该channel的数据处理业务逻辑链
+- Channel类图
+- ChannelConfig类图
 
 
 
