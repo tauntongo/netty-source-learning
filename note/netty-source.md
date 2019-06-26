@@ -293,7 +293,7 @@ register()->>doBind():then
 1. 检测新连接
 2. 创建NioSocketChannel
 3. 分配NioEventLoop及注册selector
-4. 向selector注册读（OP_READ）事件
+4. 监听channel的读（OP_READ）事件（netty的 “注册（register）” 都是先注册channel到selector然后再通过selectionKey.interestOps()来设置监听channel的什么事件）
 
 ### 检测新连接
 
@@ -371,6 +371,14 @@ register()->>doBind():then
    1. 在boss线程检测到IO事件之后的处理IO事件中检测是否有新连接接入
 2. 新连接是怎样注册到NioEventLoop线程的？
    1. 通过chooser选择一个NioEventLoop，然后将客户端channel注册到该NioEventLoop中的selector选择器中
+
+
+
+### 本章疑问？
+
+- pipeline是如何添加handler至其逻辑链的；pipeline是如何执行其逻辑链的？pipeline主要可以应用在那些地方？
+
+
 
 
 
