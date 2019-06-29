@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+<configuration scan="true" scanPeriod="30 seconds"><!-- 'milliseconds','seconds','minutes' and 'hours' -->
+	<contextName>chapter-03-quick-start</contextName>
+	<Property name="log.base" value="logs" />
+	<Property name="log.name" value="chapter-03-quick-start" />
+	<jmxConfigurator />
+	<!-- 控制台输出日志 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%-5level [%contextName] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %X{req.remoteHost} %X{req.requestURI} %X{username} %logger:%L - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!-- 文件输出日志 (文件大小策略进行文件输出，超过指定大小对文件备份) -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${log.base}/${log.name}.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"><!-- rollover daily -->
+			<FileNamePattern>${log.base}/${log.name}-log-%d{yyyy-MM-dd}.%i.zip</FileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP"> 
+				<maxFileSize>10MB</maxFileSize><!-- or whenever the file size reaches 5MB -->
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>90</maxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>%-5level [%contextName] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %X{req.remoteHost} %X{req.requestURI} %X{username} %logger.%method - %msg%n</Pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="ASYNC-STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <appender-ref ref="STDOUT" />
+    </appender>
+	
+	<appender name="ASYNC-FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <appender-ref ref="FILE" />
+    </appender>
+    
+
+	<root level="INFO">
+		<appender-ref ref="ASYNC-STDOUT" />
+		<appender-ref ref="ASYNC-FILE" />
+	</root>
+
+	<!--这里指定logger name 是为jmx设置日志级别做铺垫  -->
+	<logger name="top.taunton" additivity="true" level="INFO" />
+	<logger name="org.springframework" additivity="true" level="INFO" />
+	<logger name="org.apache.ibatis" additivity="true" level="INFO" />
+	<logger name="org.mybatis" additivity="true" level="INFO" />
+	<logger name="org.mybatis.io" additivity="true" level="INFO" />
+	<logger name="java.sql" additivity="true" level="INFO" />
+</configuration>

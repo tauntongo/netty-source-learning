@@ -8,10 +8,7 @@ import io.netty.util.internal.StringUtil;
 import org.junit.Test;
 
 import java.nio.channels.SelectionKey;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * <p></p>
@@ -44,6 +41,7 @@ public class SimpleTest {
         long currentTimeMillis = System.currentTimeMillis();
         System.out.println(currentNanoTime);
         System.out.println(currentTimeMillis);
+        System.out.println(currentNanoTime == currentTimeMillis);
         Class<SimpleTest> simpleTestClass = SimpleTest.class;
         boolean assignableFrom = simpleTestClass.isAssignableFrom(SimpleTest.class);
     }
