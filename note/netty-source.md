@@ -134,7 +134,7 @@ register()->>doBind():then
   - 具体注册流程：
 
     - AbstractChannel.register(channel)：入口
-      - this.eventLoop  =  eventLoop：绑定线程，服务端对请求的接收轮询就是在通过此线程进行的，因此eventLoop是netty的核心
+      - this.eventLoop  =  eventLoop：绑定eventLoop，服务端对请求的接收轮询就是在通过此线程进行的，因此eventLoop是netty的核心
       - register0()：实际注册
         - doRegister()：调用jdk底层注册
         - invokeHandlerAddedIfNeeded()：回调执行handler中的handlerAdded(ChannelHandlerContext ctx)
@@ -186,7 +186,7 @@ register()->>doBind():then
 
 ### NioEventLoop启动运行时序图
 
-
+![NioEventLoop-Start-Running-Timing-Diagram](map-img/NioEventLoop-Start-Running-Timing-Diagram.png)
 
 
 
@@ -212,8 +212,8 @@ register()->>doBind():then
   
   4. 创建NioEventLoop选择器：chooserFactory.newChooser()，用来在有外部请求时从NioEventLoop数组中挑选一个NioEventLoop来处理请求
      - isPowerOfTwo：NioEventLoop数组长度是否为2的n次幂，是则创建new PowerOfTwoEventExecutorChooser(executors)，否则创建new GenericEventExecutorChooser(executors)
-     - PowerOfTwoEventExecutorChooser选择NioEventLoop规则：index++ & (length-1)
-     - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
+       - PowerOfTwoEventExecutorChooser选择NioEventLoop规则：index++ & (length-1)
+       - GenericEventExecutorChooser选择NioEventLoop规则：abs(index++ % length)
 
 ### NioEventLoop启动运行(for(;;)循环)
 
@@ -354,8 +354,6 @@ register()->>doBind():then
   - Pipeline：负责处理该channel的数据处理业务逻辑链
 - Channel类图
 - ChannelConfig类图
-
-
 
 ### 新连接分配NioEventLoop与selector注册
 
