@@ -8,7 +8,8 @@
 
 - NioEventLoop（核心）
   - Channel：netty自定义的Channel，是对nio中的Channel的进一步封装
-  - Pipeline
+    - Unsafe:用于实现每一种Channel的读写抽象
+    - Pipeline:负责处理该Channel的数据处理业务逻辑链（将Channel的不同阶段、不同事件、handler等串联起来执行）
   - ChannelHandler：每一次Channel需要进行数据处理就放出一个ChannelHandler来进行处理，我们可以创建多个ChannelHandler对象添加到Channel里面去，从而介入Channel的数据处理流程中去。我们的业务代码也写在这里面。
   - ByteBuffer
 
@@ -353,7 +354,9 @@ register()->>doBind():then
 - 相同
   - Pipeline：负责处理该channel的数据处理业务逻辑链
 - Channel类图
+  - ![Channel-Simple-Class-Diagram](map-img/Channel-Simple-Class-Diagram.png)
 - ChannelConfig类图
+  - ![Channel-Simple-Class-Diagram](map-img/ChannelConfig-Simple-Class-Diagram.png)
 
 ### 新连接分配NioEventLoop与selector注册
 
@@ -372,8 +375,12 @@ register()->>doBind():then
 
 
 
+
+
 ### 本章疑问？
 
+- ChannelPromise是什么？作用是什么？用于何处？
+- ChannelFuture是什么？作用是什么？用于何处？
 - pipeline是如何添加handler至其逻辑链的；pipeline是如何执行其逻辑链的？pipeline主要可以应用在那些地方？
 
 
