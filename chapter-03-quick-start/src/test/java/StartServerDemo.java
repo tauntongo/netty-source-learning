@@ -10,6 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.junit.Test;
 
@@ -44,8 +45,8 @@ public class StartServerDemo {
                     //对NioServerSocketChannel的处理介入，这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
                     .handler(new ServerChannelInboundHandler())
                     //对accept到的SocketChannel处理介入,我们如果要写业务代码一般也就是写在handler里面了
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        protected void initChannel(SocketChannel ch) throws Exception {
+                    .childHandler(new ChannelInitializer<NioSocketChannel>() {
+                        protected void initChannel(NioSocketChannel ch) throws Exception {
                             //可以在这这这里加上众多的handler介入对accept到的Channel的处理
                             //ch.pipeline().addLast()
                             //ch.pipeline().addLast()

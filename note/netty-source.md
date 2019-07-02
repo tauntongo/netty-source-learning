@@ -358,6 +358,17 @@ register()->>doBind():then
 - ChannelConfig类图
   - ![Channel-Simple-Class-Diagram](map-img/ChannelConfig-Simple-Class-Diagram.png)
 
+### 服务端Channel的pipeline逻辑链构成
+
+- Head、ServerBootstrapAcceptor、Tail
+- 执行顺序Head -> ServerBootstrapAcceptor -> Tail
+- ServerBootstrapAcceptor在逻辑链中的作用
+  - 添加childHandler
+  - 设置options和attrs
+  - 从NioEventLoopGroup中选择一个NioEventLoop并注册selector
+
+
+
 ### 新连接分配NioEventLoop与selector注册
 
 ### NioSocketChannel读事件的注册
