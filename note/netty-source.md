@@ -358,22 +358,16 @@ register()->>doBind():then
 - ChannelConfig类图
   - ![Channel-Simple-Class-Diagram](map-img/ChannelConfig-Simple-Class-Diagram.png)
 
-### 服务端Channel的pipeline逻辑链构成
+### ServerBootstrapAcceptor
 
-- Head、ServerBootstrapAcceptor、Tail
-- 执行顺序Head -> ServerBootstrapAcceptor -> Tail
-- ServerBootstrapAcceptor在逻辑链中的作用
+- pipeline中逻辑链的执行的执行主体为ChannelHandlerContext的实现类，所有添加进pipeline中的ChanelHandler都是被包装成ChannelHandlerContext，然后通过其next及prev这两个属性将所有添加进去的ChannelHandler串联起来，next一个个迭代执行
+- 而在pipeline创建的时候就会有两个ChannelHandlerContext被创建并被赋给其全局变量head、tail，后续每次执行逻辑链都是从head这个ChannelHandlerContext开始，通过递归next一个个执行ChanelHandlerContext，到最后的tail这个ChannelHandlerContext时，其next值为空就结束
+
+- ServerBootstrapAcceptor，在fireChannelRead事件被触发后会执行到逻辑链中的这一个ChannelHandler的channelRead方法
   - 添加childHandler
   - 设置options和attrs
-  - 从NioEventLoopGroup中选择一个NioEventLoop并注册selector
-
-
-
-### 新连接分配NioEventLoop与selector注册
-
-### NioSocketChannel读事件的注册
-
-
+  - 从NioEventLoopGroup中选择一个NioEventLoop分配给NioSocketChannel并注册selector
+  - 触发fireChannelActive事件，在HeadContext的channelActive方法实现中会设置selectionKey的interestOps为OP_READ
 
 
 
