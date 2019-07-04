@@ -15,11 +15,13 @@ public class ServerChannelInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext context){
+        context.fireChannelActive();
         System.out.println("channelActive event");
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        ctx.fireChannelRegistered();
         System.out.println("channelRegistered event");
     }
 
@@ -30,11 +32,15 @@ public class ServerChannelInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        //super.channelRead(ctx, msg);
+        //找到下一个handler并继续执行channelRead
+        ctx.fireChannelRead(msg);
         System.out.println("channelRead event");
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.fireChannelReadComplete();
         System.out.println("channelReadComplete event");
     }
 }
