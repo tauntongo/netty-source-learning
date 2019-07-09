@@ -20,7 +20,7 @@
 ### QuickStart-启动一个Netty服务端
 
 ```java
-public class StartServerDemo {
+public class InBoundChannelHandlerTestDemo {
 
     @Test
     public void server(){
@@ -44,7 +44,7 @@ public class StartServerDemo {
                     //为服务端设置ChannelHandler这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
                     //我们对于netty处理流程中接入一般都是在handler中实现，netty已经定义了基本的ChannelHandler接口、抽象类、以及众多实现类，
                     //我们既可以使用既有的ChannelHandler实现，亦可实现或继承自定义ChannelHandler。
-                    .handler(new ServerChannelInboundHandler())
+                    .handler(new serverChannelHandler.ServerChannelInboundHandler())
                     //.handler(new ChannelInitializer<NioServerSocketChannel>() {
                     //    @Override
                     //    protected void initChannel(NioServerSocketChannel ch) throws Exception {
