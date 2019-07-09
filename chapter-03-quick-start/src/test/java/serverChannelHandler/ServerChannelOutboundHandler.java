@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2019. tangduns945@gmail.com.
+ */
+
+package serverChannelHandler;
+
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 
 /**
@@ -8,5 +15,8 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
  * @since
  */
 public class ServerChannelOutboundHandler extends ChannelOutboundHandlerAdapter {
-
+    @Override
+    public void read(ChannelHandlerContext ctx) throws Exception {
+        super.read(ctx);
+    }
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 2019. tangduns945@gmail.com.
  */
 
-import io.netty.channel.ChannelHandlerContext;
+package serverChannelHandler;import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
@@ -15,14 +15,14 @@ public class ServerChannelInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext context){
-        context.fireChannelActive();
         System.out.println("channelActive event");
+        context.fireChannelActive();
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        ctx.fireChannelRegistered();
         System.out.println("channelRegistered event");
+        ctx.fireChannelRegistered();
     }
 
     @Override
@@ -32,15 +32,15 @@ public class ServerChannelInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println("channelRead event");
         //super.channelRead(ctx, msg);
         //找到下一个handler并继续执行channelRead
         ctx.fireChannelRead(msg);
-        System.out.println("channelRead event");
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.fireChannelReadComplete();
         System.out.println("channelReadComplete event");
+        ctx.fireChannelReadComplete();
     }
 }
