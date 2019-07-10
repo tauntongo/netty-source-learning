@@ -20,7 +20,7 @@
 ### QuickStart-启动一个Netty服务端
 
 ```java
-public class InBoundChannelHandlerTestDemo {
+public class InboundChannelHandlerTestDemo {
 
     @Test
     public void server(){
@@ -419,11 +419,18 @@ register()->>doBind():then
 ### 概述
 
 - pipeline中所说的**逻辑链**实质上是一个**双向链表的结构**，固定以Pipeine.HeadContext开头，以Pipeline.TailContext结尾，中间的链表元素则是我们添加进去的经过包装后(ChannelHandlerContext)的ChannelHandler
+- ![2019-07-10-01-异常事件的传播](img/2019-07-10-01-异常事件的传播.png)
 
 
 
 ### 三个问题
 
 - netty是如何判断ChannelHandler类型的？
+  - 我们在往pipeline中添加channelHandler的时候，会通过instanceof关键字判断是InBoundChannelHandler还是OutBoundChannelHandler，并在随后将ChannelHandler包装成ChannelHandlerContext对象的时候，在其中设置inBound和outBound两个布尔属性值
 - 对于ChannelHandler的添加应该遵循什么样的顺序？
+  - InBound事件的传播与用户代码中添加InBoundChannelHandler的顺序正相关，OutBound事件的传播与用户代码中添加OutBoundHandler的顺序负相关
 - 用户手动触发事件传播，不同的触发方式有什么样的区别？
+  1. 触发方式一：通过pipeline手动触发；此种方式触发会将pipeline中的整条逻辑链执行一遍，如果是InBound事件会从head节点开始，正序执行逻辑链上的所有InBoundChannelHandler；如果是OutBound事件会从tail节点开始，逆序执行逻辑链上的所有OutBoundChannelHandler
+     1. ex: channelHandlerContext.pipeline().fireChannelRead(msg);
+  2. 触发方式二：通过逻辑链中的某个节点手动触发；如果是InBound事件，此种方式的事件执行起始点为下一节点开始，正序执行逻辑链上的InBoundChannelHandler直到尾部；如果是OutBound事件，此种方式的事件执行起点为上一节点，逆序执行逻辑链上的OutBoundChannelHandler直到头部
+     1. ex: channelHandlerContext.fireChannelRead(msg)
