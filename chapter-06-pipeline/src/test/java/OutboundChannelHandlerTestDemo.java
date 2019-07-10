@@ -2,6 +2,9 @@
  * Copyright (c) 2019. tangduns945@gmail.com.
  */
 
+import childChannelHandler.OutboundHandlerA;
+import childChannelHandler.OutboundHandlerB;
+import childChannelHandler.OutboundHandlerC;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,7 +15,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.junit.Test;
-import serverChannelHandler.ServerChannelInboundHandler;
 
 /**
  * <p></p>
@@ -20,7 +22,7 @@ import serverChannelHandler.ServerChannelInboundHandler;
  * @Author <a href="mailto:tangduns945@gmail.com">Taunton</a>
  * @Date Created in 2019-05-26 16:27
  */
-public class InBoundChannelHandlerTestDemo {
+public class OutboundChannelHandlerTestDemo {
 
     @Test
     public void server(){
@@ -50,9 +52,9 @@ public class InBoundChannelHandlerTestDemo {
                     .childHandler(new ChannelInitializer<NioSocketChannel>() {
                         protected void initChannel(NioSocketChannel ch) throws Exception {
                             //可以在这这这里加上众多的handler介入对accept到的Channel的处理
-                            //ch.pipeline().addLast()
-                            //ch.pipeline().addLast()
-                            //ch.pipeline().addAfter()
+                            ch.pipeline().addLast(new OutboundHandlerA());
+                            ch.pipeline().addLast(new OutboundHandlerB());
+                            ch.pipeline().addLast(new OutboundHandlerC());
                         }
                     });
 
