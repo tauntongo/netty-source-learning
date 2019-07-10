@@ -41,17 +41,6 @@ public class InBoundChannelHandlerTestDemo {
                     //对accept到的SocketChannel的属性设置，每次accept到SocketChannel都会按照我们所传的属性设置一遍
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
 
-                    //为服务端设置ChannelHandler这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
-                    //我们对于netty处理流程中接入一般都是在handler中实现，netty已经定义了基本的ChannelHandler接口、抽象类、以及众多实现类，
-                    //我们既可以使用既有的ChannelHandler实现，亦可实现或继承自定义ChannelHandler。
-                    .handler(new ServerChannelInboundHandler())
-                    //.handler(new ChannelInitializer<NioServerSocketChannel>() {
-                    //    @Override
-                    //    protected void initChannel(NioServerSocketChannel ch) throws Exception {
-                    //        ch.pipeline().addLast()
-                    //    }
-                    //})
-
                     //为新连接设置ChannelHandler，我们如果要写业务代码一般也就是写在handler里面了。
                     //请注意：这是一个比较特殊的ChannelHandler抽象实现类，因为其本身并没有任何业务处理代码，当这个ChannelHandler的handlerAdded
                     //方法因fireHandlerAdded事件触发而被执行时，在handlerAdded方法中会调用initChannel(ChannelHandlerContext ctx)方法，

@@ -166,8 +166,10 @@ register()->>doBind():then
 
 
 
+##### 分配NioEventLoop
 
-
+- 入口：initAndRegister()
+  - config().group().register(channel)
 
 ##### 服务端口的绑定
 
@@ -183,7 +185,7 @@ register()->>doBind():then
   - AbstractChannel.AbstractUnsafe.bind()：入口
     - doBind()
       - javaChannel().bind()：调用jdk底层nio接口ServerSocketChannel绑定端口
-    - pipeline.fireChannelActive()：传播channelActive事件
+    - pipeline.fireChannelActive()：传播channelActive事件，在传播的时候在头节点HeadContext节点的channelActive方法实现中会设置selectionKey的interestOps为OP_READ
   - 部分步骤源码：
     - ![2019-06-04-01-bind](img\2019-06-04-01-bind.png)
 

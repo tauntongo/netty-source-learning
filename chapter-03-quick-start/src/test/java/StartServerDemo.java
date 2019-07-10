@@ -36,9 +36,10 @@ public class StartServerDemo {
                     // 对服务端Channel NioServerSocketChannel的属性设置，可通过多次调用设置多个
                     //.attr()
                     //.attr()
-                    //对accept到的SocketChannel的配置，每次accept到SocketChannel都会按照我们所传的配置项配置一遍
+                    //对accept到的SocketChannel的配置，主要是和底层TCP读写相关的配置，每次accept到SocketChannel都会按照我们所传的配置项配置一遍
                     .childOption(ChannelOption.TCP_NODELAY, true)
-                    //对accept到的SocketChannel的属性设置，每次accept到SocketChannel都会按照我们所传的属性设置一遍
+                    //对accept到的SocketChannel的属性设置，为了可以在客户端channel绑定一些自定义的属性如秘钥、存活时间之类的，
+                    // 每次accept到SocketChannel都会按照我们所传的属性设置一遍
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
 
                     //为服务端设置ChannelHandler这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
