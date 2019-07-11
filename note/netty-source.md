@@ -419,7 +419,54 @@ register()->>doBind():then
 ### 概述
 
 - pipeline中所说的**逻辑链**实质上是一个**双向链表的结构**，固定以Pipeine.HeadContext开头，以Pipeline.TailContext结尾，中间的链表元素则是我们添加进去的经过包装后(ChannelHandlerContext)的ChannelHandler
+- 每一个节点元素对象都有next、prev这两个属性，从而形成双向链表
 - ![2019-07-10-01-异常事件的传播](img/2019-07-10-01-异常事件的传播.png)
+
+
+
+### 主要的几个类联系及其作用
+
+##### Pipeline
+
+- 如果想要完成的执行一条handler链的话，就需要通过pipeline来作为入口，从头或者从尾（看触发的是inbound事件还是outbound事件）开始执行。
+
+##### ChannelHandler
+
+- channelHandler是逻辑链中每一个节点其事件触发后的实际执行者
+- 大体上分为两类InBoundHandler、OutBoundHandler，分别对应着inbound事件的处理、outbound事件的处理
+
+##### ChannelHandlerContext
+
+- 逻辑链中的每一个节点
+- 在逻辑链中起到事件传播的作用，从而使事件得以传播到下一（上一）个节点
+- 是对ChannelHandler的包装；在pipeline.addxxx添加ChannelHandler的时候，回在addxxx方法内部创建ChannelHandlerContext对象将ChannelHandler设置进其handler属性，并且通过instanceof关键字判断ChannelHandler是InBoundHandler还是OutboundHandler，进而设置ChannelHandlerContext对象的inbound与outbound这连个布尔属性值
+
+##### HeadContext
+
+- 是Pipeline中的一个内部类
+- 其inbound属性为false，outbound属性为true，因此这是一个处理outbound事件的handler
+- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其既具有传播事件的功能又具有事件触发后实际执行者的功能
+
+##### TailContext
+
+- 是Pipeline中的一个内部类
+- 其inbound属性为true，outbound属性为false，因此这是一个处理inbound事件的handler
+- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其既具有传播事件的功能又具有事件触发后实际执行者的功能
+
+### Inbound事件与Outbound事件
+
+|        | Inbound | Outbound |
+| ------ | ------- | -------- |
+| 相同点 |         |          |
+| 不同点 |         |          |
+
+
+
+### 异常的传播
+
+
+
+
 
 
 
