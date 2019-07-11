@@ -16,8 +16,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 public class InboundHandlerThrowExceptionB extends ChannelInboundHandlerAdapter {
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        throw new Exception("InBoundChannelHandlerThrowExceptionA进行channelRead时出现异常！！！");
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws BizException {
+        throw new BizException("InBoundChannelHandlerThrowExceptionA进行channelRead时出现异常！！！");
     }
 
 }

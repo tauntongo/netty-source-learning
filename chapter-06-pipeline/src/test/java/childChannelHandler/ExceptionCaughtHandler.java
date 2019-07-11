@@ -17,7 +17,7 @@ public class ExceptionCaughtHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if(cause instanceof Exception){
+        if(cause instanceof BizException){
             System.out.println("ExceptionCaughtHandler:" + cause.getMessage());
         }else{
             ctx.fireExceptionCaught(cause);

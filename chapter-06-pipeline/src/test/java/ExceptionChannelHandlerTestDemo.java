@@ -53,7 +53,6 @@ public class ExceptionChannelHandlerTestDemo {
                             ch.pipeline().addLast(new InboundHandlerA());
 
                             ch.pipeline().addLast(new InboundHandlerThrowExceptionB());
-
                             ch.pipeline().addLast(new InboundHandlerB());
                             ch.pipeline().addLast(new InboundHandlerC());
                             ch.pipeline().addLast(new OutboundHandlerA());
