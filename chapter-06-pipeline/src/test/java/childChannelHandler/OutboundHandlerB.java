@@ -27,9 +27,16 @@ public class OutboundHandlerB extends ChannelOutboundHandlerAdapter {
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         ctx.executor().schedule(() -> {
+            //channel().write(...)内部任是调用pipeline.write(...)
             ctx.channel().write("I GOT IT");
-            //ctx.pipeline().write("i got it");
-            //ctx.write("i got it");
+            //ctx.pipeline().write("I GOT IT");
+            //ctx.write("I GOT IT");
         }, 3, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        System.out.println("OutboundHandlerB exceptionCaught");
+        ctx.fireExceptionCaught(cause);
     }
 }

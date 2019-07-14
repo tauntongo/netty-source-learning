@@ -58,7 +58,7 @@ public class ExceptionChannelHandlerTestDemo {
                             ch.pipeline().addLast(new OutboundHandlerA());
                             ch.pipeline().addLast(new OutboundHandlerB());
                             ch.pipeline().addLast(new OutboundHandlerC());
-
+                            //对于异常的处理，通常的做法是在最后添加一个统一的异常处理器，从而进行异常统一处理
                             ch.pipeline().addLast(new ExceptionCaughtHandler());
                         }
                     });

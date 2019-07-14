@@ -17,7 +17,13 @@ public class InboundHandlerThrowExceptionB extends ChannelInboundHandlerAdapter 
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws BizException {
-        throw new BizException("InBoundChannelHandlerThrowExceptionA进行channelRead时出现异常！！！");
+        throw new BizException("InBoundChannelHandlerThrowExceptionB进行channelRead时出现异常！！！");
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        System.out.println("InboundHandlerThrowExceptionB exceptionCaught");
+        ctx.fireExceptionCaught(cause);
     }
 
 }

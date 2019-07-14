@@ -19,6 +19,7 @@ public class ExceptionCaughtHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if(cause instanceof BizException){
             System.out.println("ExceptionCaughtHandler:" + cause.getMessage());
+            //ctx.pipeline().write("process interrupt")；
         }else{
             ctx.fireExceptionCaught(cause);
         }
