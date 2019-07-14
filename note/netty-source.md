@@ -112,11 +112,11 @@ register()->>doBind():then
 - 具体创建的流程
 
   - newSocket()：通过jdk来创建底层jdk channel
-    - ![2019-05-26-2.1-newSocket()](img\2019-05-26-2.1-newSocket().png)
+    - ![2019-05-26-2.1-newSocket()](img/2019-05-26-2.1-newSocket().png)
   - AbstractNioChannel()
     - AbstractChannel()：创建id，unsafe，pipeline
     - SelectableChannel.configureBlocking(false)：jdk底层channel配置阻塞模式
-    - ![2019-05-26-2.2-AbstractNioChannel()](img\2019-05-26-2.2-AbstractNioChannel().png)
+    - ![2019-05-26-2.2-AbstractNioChannel()](img/2019-05-26-2.2-AbstractNioChannel().png)
   - new NioServerSocketChannelConfig()：tcp参数配置类。通过ServerBootstrap.option()保存的参数最终会被设置到此配置对象中去
 
 
@@ -140,7 +140,7 @@ register()->>doBind():then
     - childGroup、childHandler、childOptions、childAttrs：获取到对客户端Channel的各种配置，用来在后面第四步传入连接器中；childOptions主要是和弟底层tcp读写相关的配置，childAttrs主要是为了可以在channel上绑定一些自定义的属性，如该chanel的秘钥、存活时间之类的
     - add ServerBootstrapAcceptor：添加连接器（每次accept到SocketChannel后使用用户配置的childGroup、childHandler、childOptions、childAttrs作为其配置）
     - 源码：
-      - ![2019-05-27-1-ServerBootstrap.init()](img\2019-05-27-1-ServerBootstrap.init().png)
+      - ![2019-05-27-1-ServerBootstrap.init()](img/2019-05-27-1-ServerBootstrap.init().png)
 
 ##### 注册到selector
 
@@ -161,8 +161,8 @@ register()->>doBind():then
         - invokeHandlerAddedIfNeeded()：回调执行handler中的handlerAdded(ChannelHandlerContext ctx)
         - fireChannelRegistered()：传播channel注册事件，可以让如我们添加的自定义handler感知
     - 部分源码流程：
-      - ![2019-06-02-01AbstractChanel.register](img\2019-06-02-01AbstractChanel.register.png)
-      - ![2019-06-02-02-Abstractchannel.regist0](img\2019-06-02-02-Abstractchannel.regist0.png)
+      - ![2019-06-02-01AbstractChanel.register](img/2019-06-02-01AbstractChanel.register.png)
+      - ![2019-06-02-02-Abstractchannel.regist0](img/2019-06-02-02-Abstractchannel.regist0.png)
 
 
 
@@ -187,7 +187,7 @@ register()->>doBind():then
       - javaChannel().bind()：调用jdk底层nio接口ServerSocketChannel绑定端口
     - pipeline.fireChannelActive()：传播channelActive事件，在传播的时候在头节点HeadContext节点的channelActive方法实现中会设置selectionKey的interestOps为OP_READ
   - 部分步骤源码：
-    - ![2019-06-04-01-bind](img\2019-06-04-01-bind.png)
+    - ![2019-06-04-01-bind](img/2019-06-04-01-bind.png)
 
 # Chapter-04(NioEventLoop)
 
@@ -422,9 +422,23 @@ register()->>doBind():then
 - 每一个节点元素对象都有next、prev这两个属性，从而形成双向链表
 - ![2019-07-10-01-异常事件的传播](img/2019-07-10-01-异常事件的传播.png)
 
+### 关键类类图
+
+##### ChannelInboundHandler接口
+
+##### ChannelOutboundHandler接口
+
+##### AbstractChannelHandlerContext
+
+##### DefaultChannelPipeline.HeadContext
+
+##### DefaultChannelPipeline.TailContext
 
 
-### 主要的几个类联系及其作用
+
+
+
+### 主要的几个类之间的联系及其作用
 
 ##### Pipeline
 
