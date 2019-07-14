@@ -442,12 +442,13 @@ register()->>doBind():then
 
 ##### Pipeline
 
-- 如果想要完成的执行一条handler链的话，就需要通过pipeline来作为入口，从头或者从尾（看触发的是inbound事件还是outbound事件）开始执行。
+- 如果想要**完整**的执行一条handler链的话，就需要通过pipeline来作为入口，从头或者从尾（看触发的是inbound事件还是outbound事件）开始执行。
 
 ##### ChannelHandler
 
 - channelHandler是逻辑链中每一个节点其事件触发后的实际执行者
-- 大体上分为两类InBoundHandler、OutBoundHandler，分别对应着inbound事件的处理、outbound事件的处理
+- 大体上分为两类InboundHandler、OutboundHandler，分别对应着inbound事件的处理、outbound事件的处理
+- **ChannelHandler.@Sharble**注解：被添加到pipeline的channelHandler会检查其类是否被@Sharable注解修饰，若没有，则一个pipeline中同一个handler对象只能被添加一次，否则会抛出异常
 
 ##### ChannelHandlerContext
 
@@ -469,18 +470,17 @@ register()->>doBind():then
 
 ### Inbound事件与Outbound事件
 
-|        | Inbound | Outbound |
-| ------ | ------- | -------- |
-| 相同点 |         |          |
-| 不同点 |         |          |
+|        | Inbound                                                      | Outbound                                                     |
+| ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 相同点 |                                                              |                                                              |
+| 不同点 | 如果通过pipeline触发的inbound事件，会从head开始往后          | 当通过pipeline触发outbound事件时，汇总tail开始往前传播       |
+|        | inbound事件都是一些被动型的事件，大都是netty内部触发的，如channelActive、channelRead等事件 | outbound事件大都是一些主动型事件，大都是用户代码中去主动触发的，如write等事件 |
 
 
 
 ### 异常的传播
 
-
-
-
+- 从出现异常的当前handler节点开始往后传播，整条链路中不管是inbound类型的handler还是outbound类型的handler都能接收到
 
 
 
