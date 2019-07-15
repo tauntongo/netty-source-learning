@@ -400,10 +400,6 @@ register()->>doBind():then
 2. 新连接是怎样注册到NioEventLoop线程的？
    1. 通过chooser选择一个NioEventLoop，然后将客户端channel注册到该NioEventLoop中的selector选择器中
 
-
-
-
-
 ### 本章疑问？
 
 - ChannelPromise是什么？作用是什么？用于何处？
@@ -424,17 +420,17 @@ register()->>doBind():then
 
 ### 关键类类图
 
-##### ChannelInboundHandler接口
+##### ChannelHandler接口
 
-##### ChannelOutboundHandler接口
+- ![ChannelHandler-Class-Diagram](map-img/ChannelHandler-Class-Diagram.png)
+
+
 
 ##### AbstractChannelHandlerContext
 
 ##### DefaultChannelPipeline.HeadContext
 
 ##### DefaultChannelPipeline.TailContext
-
-
 
 
 
@@ -449,6 +445,7 @@ register()->>doBind():then
 - channelHandler是逻辑链中每一个节点其事件触发后的实际执行者
 - 大体上分为两类InboundHandler、OutboundHandler，分别对应着inbound事件的处理、outbound事件的处理
 - **ChannelHandler.@Sharble**注解：被添加到pipeline的channelHandler会检查其类是否被@Sharable注解修饰，若没有，则一个pipeline中同一个handler对象只能被添加一次，否则会抛出异常
+- SimpleChannelInboundHandler：netty中经过包装的一个inboundHandler，其实现了channelRead方法，在内部帮我们进行了缓冲区的释放，从而我们不必多些代码去做缓冲区的释放，我们只需要去实现channelRead0这个抽象方法即可。[用法](https://github.com/tauntongo/netty-source-analysis-learning-sample/blob/master/chapter-06-pipeline/src/test/java/childChannelHandler/AuthChannelHandler.java)
 
 ##### ChannelHandlerContext
 
@@ -473,7 +470,7 @@ register()->>doBind():then
 |        | Inbound                                                      | Outbound                                                     |
 | ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 相同点 |                                                              |                                                              |
-| 不同点 | 如果通过pipeline触发的inbound事件，会从head开始往后          | 当通过pipeline触发outbound事件时，汇总tail开始往前传播       |
+| 不同点 | 当通过pipeline触发inbound事件时，会从head开始往后传播        | 当通过pipeline触发outbound事件时，会从tail开始往前传播       |
 |        | inbound事件都是一些被动型的事件，大都是netty内部触发的，如channelActive、channelRead等事件 | outbound事件大都是一些主动型事件，大都是用户代码中去主动触发的，如write等事件 |
 
 
@@ -481,8 +478,7 @@ register()->>doBind():then
 ### 异常的传播
 
 - 从出现异常的当前handler节点开始往后传播，整条链路中不管是inbound类型的handler还是outbound类型的handler都能接收到
-
-
+- netty中我们对于异常的处理一般是在最后添加一个用来进行异常处理的**handler进行异常的统一处理**
 
 ### 三个问题
 
