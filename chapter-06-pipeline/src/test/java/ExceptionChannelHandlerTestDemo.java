@@ -2,6 +2,7 @@
  * Copyright (c) 2019. tangduns945@gmail.com.
  */
 
+import childChannelHandler.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,7 +13,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.junit.Test;
-import serverChannelHandler.ServerChannelInboundHandler;
 
 /**
  * <p></p>
@@ -20,7 +20,7 @@ import serverChannelHandler.ServerChannelInboundHandler;
  * @Author <a href="mailto:tangduns945@gmail.com">Taunton</a>
  * @Date Created in 2019-05-26 16:27
  */
-public class StartServerDemo {
+public class ExceptionChannelHandlerTestDemo {
 
     @Test
     public void server(){
@@ -36,22 +36,10 @@ public class StartServerDemo {
                     // 对服务端Channel NioServerSocketChannel的属性设置，可通过多次调用设置多个
                     //.attr()
                     //.attr()
-                    //对accept到的SocketChannel的配置，主要是和底层TCP读写相关的配置，每次accept到SocketChannel都会按照我们所传的配置项配置一遍
+                    //对accept到的SocketChannel的配置，每次accept到SocketChannel都会按照我们所传的配置项配置一遍
                     .childOption(ChannelOption.TCP_NODELAY, true)
-                    //对accept到的SocketChannel的属性设置，为了可以在客户端channel绑定一些自定义的属性如秘钥、存活时间之类的，
-                    // 每次accept到SocketChannel都会按照我们所传的属性设置一遍
+                    //对accept到的SocketChannel的属性设置，每次accept到SocketChannel都会按照我们所传的属性设置一遍
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
-
-                    //为服务端设置ChannelHandler这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
-                    //我们对于netty处理流程中接入一般都是在handler中实现，netty已经定义了基本的ChannelHandler接口、抽象类、以及众多实现类，
-                    //我们既可以使用既有的ChannelHandler实现，亦可实现或继承自定义ChannelHandler。
-                    .handler(new ServerChannelInboundHandler())
-                    //.handler(new ChannelInitializer<NioServerSocketChannel>() {
-                    //    @Override
-                    //    protected void initChannel(NioServerSocketChannel ch) throws Exception {
-                    //        ch.pipeline().addLast()
-                    //    }
-                    //})
 
                     //为新连接设置ChannelHandler，我们如果要写业务代码一般也就是写在handler里面了。
                     //请注意：这是一个比较特殊的ChannelHandler抽象实现类，因为其本身并没有任何业务处理代码，当这个ChannelHandler的handlerAdded
@@ -62,9 +50,16 @@ public class StartServerDemo {
                     .childHandler(new ChannelInitializer<NioSocketChannel>() {
                         protected void initChannel(NioSocketChannel ch) throws Exception {
                             //可以在这这这里加上众多的handler介入对accept到的Channel的处理
-                            //ch.pipeline().addLast()
-                            //ch.pipeline().addLast()
-                            //ch.pipeline().addAfter()
+                            ch.pipeline().addLast(new InboundHandlerA());
+
+                            ch.pipeline().addLast(new InboundHandlerThrowExceptionB());
+                            ch.pipeline().addLast(new InboundHandlerB());
+                            ch.pipeline().addLast(new InboundHandlerC());
+                            ch.pipeline().addLast(new OutboundHandlerA());
+                            ch.pipeline().addLast(new OutboundHandlerB());
+                            ch.pipeline().addLast(new OutboundHandlerC());
+                            //对于异常的处理，通常的做法是在最后添加一个统一的异常处理器，从而进行异常统一处理
+                            ch.pipeline().addLast(new ExceptionCaughtHandler());
                         }
                     });
 

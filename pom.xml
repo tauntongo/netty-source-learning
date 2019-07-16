@@ -16,6 +16,7 @@
         <module>chapter-02-component-introduction</module>
         <module>chapter-03-quick-start</module>
         <module>chapter-04-nioEventLoop</module>
+        <module>chapter-06-pipeline</module>
     </modules>
 
     <properties>

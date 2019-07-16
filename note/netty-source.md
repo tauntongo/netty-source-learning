@@ -20,12 +20,12 @@
 ### QuickStart-启动一个Netty服务端
 
 ```java
-public class StartServerDemo {
+public class InboundChannelHandlerTestDemo {
 
     @Test
     public void server(){
-        EventLoopGroup serverGroup = new NioEventLoopGroup(1);
-        EventLoopGroup childGroup = new NioEventLoopGroup();
+        final EventLoopGroup serverGroup = new NioEventLoopGroup(1);
+        final EventLoopGroup childGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(serverGroup,childGroup)
@@ -40,11 +40,26 @@ public class StartServerDemo {
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     //对accept到的SocketChannel的属性设置，每次accept到SocketChannel都会按照我们所传的属性设置一遍
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
-                    //对NioServerSocketChannel的处理介入，这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
-                    .handler(new ServerChannelInboundHandler())
-                    //对accept到的SocketChannel处理介入,我们如果要写业务代码一般也就是写在handler里面了
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        protected void initChannel(SocketChannel ch) throws Exception {
+
+                    //为服务端设置ChannelHandler这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
+                    //我们对于netty处理流程中接入一般都是在handler中实现，netty已经定义了基本的ChannelHandler接口、抽象类、以及众多实现类，
+                    //我们既可以使用既有的ChannelHandler实现，亦可实现或继承自定义ChannelHandler。
+                    .handler(new serverChannelHandler.ServerChannelInboundHandler())
+                    //.handler(new ChannelInitializer<NioServerSocketChannel>() {
+                    //    @Override
+                    //    protected void initChannel(NioServerSocketChannel ch) throws Exception {
+                    //        ch.pipeline().addLast()
+                    //    }
+                    //})
+
+                    //为新连接设置ChannelHandler，我们如果要写业务代码一般也就是写在handler里面了。
+                    //请注意：这是一个比较特殊的ChannelHandler抽象实现类，因为其本身并没有任何业务处理代码，当这个ChannelHandler的handlerAdded
+                    //方法因fireHandlerAdded事件触发而被执行时，在handlerAdded方法中会调用initChannel(ChannelHandlerContext ctx)方法，
+                    // 而在initChanel中会调用我们实现的initChanel(T ch)
+                    //方法，然后这个特殊ChannelHandler再将自己本身从pipeline中移除，不再参与到后续的pipeline逻辑链的处理中来。
+                    //因此我们可以看出这个ChannelHandler纯粹就是为了扩展自定义操作而生，自己本身没有任何作用
+                    .childHandler(new ChannelInitializer<NioSocketChannel>() {
+                        protected void initChannel(NioSocketChannel ch) throws Exception {
                             //可以在这这这里加上众多的handler介入对accept到的Channel的处理
                             //ch.pipeline().addLast()
                             //ch.pipeline().addLast()
@@ -54,7 +69,12 @@ public class StartServerDemo {
 
             //启动Netty服务端
             ChannelFuture channelFuture = b.bind(8848).sync();
+            System.out.println("bind port sync over");
+            //serverGroup.next().execute(() -> {
+            //    System.out.println("test server eventLoop execute");
+            //});
             channelFuture.channel().closeFuture().sync();
+            System.out.println("channelFuture sync over");
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -92,11 +112,11 @@ register()->>doBind():then
 - 具体创建的流程
 
   - newSocket()：通过jdk来创建底层jdk channel
-    - ![2019-05-26-2.1-newSocket()](img\2019-05-26-2.1-newSocket().png)
+    - ![2019-05-26-2.1-newSocket()](img/2019-05-26-2.1-newSocket().png)
   - AbstractNioChannel()
     - AbstractChannel()：创建id，unsafe，pipeline
     - SelectableChannel.configureBlocking(false)：jdk底层channel配置阻塞模式
-    - ![2019-05-26-2.2-AbstractNioChannel()](img\2019-05-26-2.2-AbstractNioChannel().png)
+    - ![2019-05-26-2.2-AbstractNioChannel()](img/2019-05-26-2.2-AbstractNioChannel().png)
   - new NioServerSocketChannelConfig()：tcp参数配置类。通过ServerBootstrap.option()保存的参数最终会被设置到此配置对象中去
 
 
@@ -120,7 +140,7 @@ register()->>doBind():then
     - childGroup、childHandler、childOptions、childAttrs：获取到对客户端Channel的各种配置，用来在后面第四步传入连接器中；childOptions主要是和弟底层tcp读写相关的配置，childAttrs主要是为了可以在channel上绑定一些自定义的属性，如该chanel的秘钥、存活时间之类的
     - add ServerBootstrapAcceptor：添加连接器（每次accept到SocketChannel后使用用户配置的childGroup、childHandler、childOptions、childAttrs作为其配置）
     - 源码：
-      - ![2019-05-27-1-ServerBootstrap.init()](img\2019-05-27-1-ServerBootstrap.init().png)
+      - ![2019-05-27-1-ServerBootstrap.init()](img/2019-05-27-1-ServerBootstrap.init().png)
 
 ##### 注册到selector
 
@@ -141,13 +161,15 @@ register()->>doBind():then
         - invokeHandlerAddedIfNeeded()：回调执行handler中的handlerAdded(ChannelHandlerContext ctx)
         - fireChannelRegistered()：传播channel注册事件，可以让如我们添加的自定义handler感知
     - 部分源码流程：
-      - ![2019-06-02-01AbstractChanel.register](img\2019-06-02-01AbstractChanel.register.png)
-      - ![2019-06-02-02-Abstractchannel.regist0](img\2019-06-02-02-Abstractchannel.regist0.png)
+      - ![2019-06-02-01AbstractChanel.register](img/2019-06-02-01AbstractChanel.register.png)
+      - ![2019-06-02-02-Abstractchannel.regist0](img/2019-06-02-02-Abstractchannel.regist0.png)
 
 
 
+##### 分配NioEventLoop
 
-
+- 入口：initAndRegister()
+  - config().group().register(channel)
 
 ##### 服务端口的绑定
 
@@ -163,9 +185,9 @@ register()->>doBind():then
   - AbstractChannel.AbstractUnsafe.bind()：入口
     - doBind()
       - javaChannel().bind()：调用jdk底层nio接口ServerSocketChannel绑定端口
-    - pipeline.fireChannelActive()：传播channelActive事件
+    - pipeline.fireChannelActive()：传播channelActive事件，在传播的时候在头节点HeadContext节点的channelActive方法实现中会设置selectionKey的interestOps为OP_READ
   - 部分步骤源码：
-    - ![2019-06-04-01-bind](img\2019-06-04-01-bind.png)
+    - ![2019-06-04-01-bind](img/2019-06-04-01-bind.png)
 
 # Chapter-04(NioEventLoop)
 
@@ -298,7 +320,7 @@ register()->>doBind():then
 
 ### 检测新连接
 
-- processSelectedKey(SelectionKey k, AbstractNioChannel ch)：是对chapter-04中处理IO事件循环的单次处理
+- NioEventLoop.processSelectedKey(SelectionKey k, AbstractNioChannel ch)：是对chapter-04中处理IO事件循环的单次处理
   - 监听到OP_ACCEPT事件，进行相应处理：AbstractNioMessageChannel.NioMessageUnsafe.read()
     - RecvByteBufAllocator.Handler allocHandler = unsafe.recvBufAllocHandle();：用来控制每次read()可以接入的连接数
     - do...while循环：
@@ -360,7 +382,7 @@ register()->>doBind():then
 
 ### ServerBootstrapAcceptor
 
-- pipeline中逻辑链的执行的执行主体为ChannelHandlerContext的实现类，所有添加进pipeline中的ChanelHandler都是被包装成ChannelHandlerContext，然后通过其next及prev这两个属性将所有添加进去的ChannelHandler串联起来，next一个个迭代执行
+- pipeline中逻辑链的执行的执行主体为ChannelHandlerContext的实现类，所有添加进pipeline中的ChanelHandler都是被包装成ChannelHandlerContext作为执行链中的一个节点，然后通过其next及prev这两个属性将所有添加进去的ChannelHandler串联起来，next一个个迭代执行
 - 而在pipeline创建的时候就会有两个ChannelHandlerContext被创建并被赋给其全局变量head、tail，后续每次执行逻辑链都是从head这个ChannelHandlerContext开始，通过递归next一个个执行ChanelHandlerContext，到最后的tail这个ChannelHandlerContext时，其next值为空就结束
 
 - ServerBootstrapAcceptor，在fireChannelRead事件被触发后会执行到逻辑链中的这一个ChannelHandler的channelRead方法
@@ -378,10 +400,6 @@ register()->>doBind():then
 2. 新连接是怎样注册到NioEventLoop线程的？
    1. 通过chooser选择一个NioEventLoop，然后将客户端channel注册到该NioEventLoop中的selector选择器中
 
-
-
-
-
 ### 本章疑问？
 
 - ChannelPromise是什么？作用是什么？用于何处？
@@ -392,5 +410,84 @@ register()->>doBind():then
 
 
 
-# Chapter-06
+# Chapter-06(Pipeline)
 
+### 概述
+
+- pipeline中所说的**逻辑链**实质上是一个**双向链表的结构**，固定以Pipeine.HeadContext开头，以Pipeline.TailContext结尾，中间的链表元素则是我们添加进去的经过包装后(ChannelHandlerContext)的ChannelHandler
+- 每一个节点元素对象都有next、prev这两个属性，从而形成双向链表
+- ![2019-07-10-01-异常事件的传播](img/2019-07-10-01-异常事件的传播.png)
+
+### 关键类类图
+
+##### ChannelHandler接口
+
+- ![ChannelHandler-Class-Diagram](map-img/ChannelHandler-Class-Diagram.png)
+
+
+
+##### AbstractChannelHandlerContext
+
+##### DefaultChannelPipeline.HeadContext
+
+##### DefaultChannelPipeline.TailContext
+
+
+
+### 主要的几个类之间的联系及其作用
+
+##### Pipeline
+
+- 如果想要**完整**的执行一条handler链的话，就需要通过pipeline来作为入口，从头或者从尾（看触发的是inbound事件还是outbound事件）开始执行。
+
+##### ChannelHandler
+
+- channelHandler是逻辑链中每一个节点其事件触发后的实际执行者
+- 大体上分为两类InboundHandler、OutboundHandler，分别对应着inbound事件的处理、outbound事件的处理
+- **ChannelHandler.@Sharble**注解：被添加到pipeline的channelHandler会检查其类是否被@Sharable注解修饰，若没有，则一个pipeline中同一个handler对象只能被添加一次，否则会抛出异常
+- SimpleChannelInboundHandler：netty中经过包装的一个inboundHandler，其实现了channelRead方法，在内部帮我们进行了缓冲区的释放，从而我们不必多些代码去做缓冲区的释放，我们只需要去实现channelRead0这个抽象方法即可。[用法](https://github.com/tauntongo/netty-source-analysis-learning-sample/blob/master/chapter-06-pipeline/src/test/java/childChannelHandler/AuthChannelHandler.java)
+
+##### ChannelHandlerContext
+
+- 逻辑链中的每一个节点
+- 在逻辑链中起到事件传播的作用，从而使事件得以传播到下一（上一）个节点
+- 是对ChannelHandler的包装；在pipeline.addxxx添加ChannelHandler的时候，回在addxxx方法内部创建ChannelHandlerContext对象将ChannelHandler设置进其handler属性，并且通过instanceof关键字判断ChannelHandler是InBoundHandler还是OutboundHandler，进而设置ChannelHandlerContext对象的inbound与outbound这连个布尔属性值
+
+##### HeadContext
+
+- 是Pipeline中的一个内部类
+- 其inbound属性为false，outbound属性为true，因此这是一个处理outbound事件的handler
+- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其既具有传播事件的功能又具有事件触发后实际执行者的功能
+
+##### TailContext
+
+- 是Pipeline中的一个内部类
+- 其inbound属性为true，outbound属性为false，因此这是一个处理inbound事件的handler
+- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其既具有传播事件的功能又具有事件触发后实际执行者的功能
+
+### Inbound事件与Outbound事件
+
+|        | Inbound                                                      | Outbound                                                     |
+| ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 相同点 |                                                              |                                                              |
+| 不同点 | 当通过pipeline触发inbound事件时，会从head开始往后传播        | 当通过pipeline触发outbound事件时，会从tail开始往前传播       |
+|        | inbound事件都是一些被动型的事件，大都是netty内部触发的，如channelActive、channelRead等事件 | outbound事件大都是一些主动型事件，大都是用户代码中去主动触发的，如write等事件 |
+
+
+
+### 异常的传播
+
+- 从出现异常的当前handler节点开始往后传播，整条链路中不管是inbound类型的handler还是outbound类型的handler都能接收到
+- netty中我们对于异常的处理一般是在最后添加一个用来进行异常处理的**handler进行异常的统一处理**
+
+### 三个问题
+
+- netty是如何判断ChannelHandler类型的？
+  - 我们在往pipeline中添加channelHandler的时候，会通过instanceof关键字判断是InBoundChannelHandler还是OutBoundChannelHandler，并在随后将ChannelHandler包装成ChannelHandlerContext对象的时候，在其中设置inBound和outBound两个布尔属性值
+- 对于ChannelHandler的添加应该遵循什么样的顺序？
+  - InBound事件的传播与用户代码中添加InBoundChannelHandler的顺序正相关，OutBound事件的传播与用户代码中添加OutBoundHandler的顺序负相关
+- 用户手动触发事件传播，不同的触发方式有什么样的区别？
+  1. 触发方式一：通过pipeline手动触发；此种方式触发会将pipeline中的整条逻辑链执行一遍，如果是InBound事件会从head节点开始，正序执行逻辑链上的所有InBoundChannelHandler；如果是OutBound事件会从tail节点开始，逆序执行逻辑链上的所有OutBoundChannelHandler
+     1. ex: channelHandlerContext.pipeline().fireChannelRead(msg);
+  2. 触发方式二：通过逻辑链中的某个节点手动触发；如果是InBound事件，此种方式的事件执行起始点为下一节点开始，正序执行逻辑链上的InBoundChannelHandler直到尾部；如果是OutBound事件，此种方式的事件执行起点为上一节点，逆序执行逻辑链上的OutBoundChannelHandler直到头部
+     1. ex: channelHandlerContext.fireChannelRead(msg)
