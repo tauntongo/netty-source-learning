@@ -491,3 +491,81 @@ register()->>doBind():then
      1. ex: channelHandlerContext.pipeline().fireChannelRead(msg);
   2. 触发方式二：通过逻辑链中的某个节点手动触发；如果是InBound事件，此种方式的事件执行起始点为下一节点开始，正序执行逻辑链上的InBoundChannelHandler直到尾部；如果是OutBound事件，此种方式的事件执行起点为上一节点，逆序执行逻辑链上的OutBoundChannelHandler直到头部
      1. ex: channelHandlerContext.fireChannelRead(msg)
+
+
+
+
+
+# Chapter-07-ByteBuf
+
+### 概述
+
+- 内存与内存管理器的抽象
+- 不同规格大小与不同类别的内存的内存的分配策略
+- 内存的回收过程
+
+
+
+### ByteBuf的结构以及重要API
+
+##### ByteBuf的结构
+
+- ```java
+  /**
+   * <pre>
+   *      +-------------------+------------------+------------------+
+   *      | discardable bytes |  readable bytes  |  writable bytes  |
+   *      |                   |     (CONTENT)    |                  |
+   *      +-------------------+------------------+------------------+
+   *      |                   |                  |                  |
+   *      0      <=      readerIndex   <=   writerIndex    <=    capacity <= maxCapacity
+   * </pre>
+   */
+  ```
+
+- 0 <=  readerIndex <= writerIndex <= capacity <= maxCapacity
+
+- readerIndex 读索引，初始化时为0
+
+- writerIndex 写索引，初始化时为0
+
+- capacity 容量，默认256，可指定，会自动扩容
+
+- maxCapacity 最大容量，默认Integer.MAX_VALUE
+
+
+
+##### 重要API
+
+- read、write、get、set
+- markReaderIndex/markWriterIndex，标记读/写索引
+- resetReaderIndex/resetWriterIndex，将读/写索引置为mark的索引值
+
+### ByteBuf分类
+
+##### 分类依据
+
+- **Pooled**与Unpooled    （池化与非池化）
+  - **这是重点，我们在区分ByteBuf其实主要区分点是区分其是否为池化，另外两个区分点都不如这个重要**
+  - Pooled：创建时分配内存时是从预先缓存好的内存中取出一段内存进行分配。池化比非池化更重要也更难分析，这是ByteBuf最重要的地方
+  - Unpooled：创建时直接分配内存（直接创建一个数组或java.nio.ByteBuffer）
+- Unsafe与非Unsafe
+  - 创建时这两种并无差别，只在创建后使用API时存在差别
+  - Unsafe：在操作ByteBuf进行读写时，会调用底层jdk的Unsafe类进行读写。是直接操作的内存地址，因此其使用效率可能相对于非Unsafe稍高点
+  - 非Unsafe：操作ByteBuf进行读写时，直接操作的Byte数组或java.nio.ByteBuffer
+- Heap与Direct
+  - Heap：堆内，Byte数组
+  - Direct：堆外，不归jvm管理，面向操作系统层面。在创建时其实在内部就是创建了一个java.nio.ByteBuffer，,然后后续操作都是操作这个ByteBuffer对象
+- 根据这三种分类依据进行全组合，得出总共有2的三次方种
+
+#####  类图
+
+- ![ByteBuf-Class-Diagram.png](map-img/ByteBuf-Class-Diagram.png)
+
+### 内存分配器ByteBufAllocator
+
+### 三个问题
+
+- 内存的类别有哪些？
+- 如何减少多线程内存分配之间的竞争？
+- 不同大小的内存是如何进行分配的？
