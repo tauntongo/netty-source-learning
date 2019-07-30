@@ -564,8 +564,21 @@ register()->>doBind():then
 
 ### 内存分配器ByteBufAllocator
 
+##### 概述
+
+- 功能：用来获取一个ByteBuf对象
+
+##### 分类 
+
+- ByteBufAllocator主要有两大子类
+  - UnpooledByteBufAllocator
+  - PooledByteBufAllocator
+- 类图
+  - 
+
 ### 三个问题
 
 - 内存的类别有哪些？
+  - subpage/page/chunk
 - 如何减少多线程内存分配之间的竞争？
 - 不同大小的内存是如何进行分配的？
