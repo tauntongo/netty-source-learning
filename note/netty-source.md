@@ -549,11 +549,11 @@ register()->>doBind():then
   - **这是重点，我们在区分ByteBuf其实主要区分点是区分其是否为池化，另外两个区分点都不如这个重要**
   - Pooled：创建时分配内存时是从预先缓存好的内存中取出一段内存进行分配。池化比非池化更重要也更难分析，这是ByteBuf最重要的地方
   - Unpooled：创建时直接分配内存（直接创建一个数组或java.nio.ByteBuffer）
-- Unsafe与非Unsafe
+- Unsafe与非Unsafe（依赖的jdk中是否有Unsafe）
   - 创建时这两种并无差别，只在创建后使用API时存在差别
   - Unsafe：在操作ByteBuf进行读写时，会调用底层jdk的Unsafe类进行读写。是直接操作的内存地址，因此其使用效率可能相对于非Unsafe稍高点
   - 非Unsafe：操作ByteBuf进行读写时，直接操作的Byte数组或java.nio.ByteBuffer
-- Heap与Direct
+- Heap与Direct（堆内与堆外）
   - Heap：堆内，Byte数组
   - Direct：堆外，不归jvm管理，面向操作系统层面。在创建时其实在内部就是创建了一个java.nio.ByteBuffer，,然后后续操作都是操作这个ByteBuffer对象
 - 根据这三种分类依据进行全组合，得出总共有2的三次方种
@@ -574,7 +574,39 @@ register()->>doBind():then
   - UnpooledByteBufAllocator
   - PooledByteBufAllocator
 - 类图
-  - 
+  - ![ByteBufAllocator-Class-Diagram](map-img/ByteBufAllocator-Class-Diagram.png)
+
+
+
+##### 重要API
+
+- UnpooledByteBufAllocator
+
+  - heapByteBuffer(initialCapacity:int):ByteBuf
+  - directByteBuffer(initialCapacity:int):ByteBuf
+
+- PooledByteBufAllocator
+
+  - heapByteBuffer(initialCapacity:int):ByteBuf
+  - directByteBuffer(initialCapacity:int):ByteBuf
+
+- netty获取ByteBuf时通过不同的类区分了Unpooled与Pooled、又通过不同的方法区分了heap与direct，那么Unsafe与非Unsafe是如何区分的呢？其实是在获取ByteBuf的方法内部通过代码区分的，通过**判断依赖的jdk中是否有Unsafe类**来选择获取**Unsafe**的ByteBuf还是**非Unsafe**的ByteBuf
+
+  - 以UnpooledByteBufAllocator.newHeapBuffer为例
+
+    - ```java
+          @Override
+          protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
+              return PlatformDependent.hasUnsafe() ? new UnpooledUnsafeHeapByteBuf(this, initialCapacity, maxCapacity)
+                      : new UnpooledHeapByteBuf(this, initialCapacity, maxCapacity);
+          }
+      ```
+
+      
+
+
+
+
 
 ### 三个问题
 
