@@ -555,7 +555,7 @@ register()->>doBind():then
   - 非Unsafe：操作ByteBuf进行读写时，直接操作的Byte数组或java.nio.ByteBuffer
 - Heap与Direct（堆内与堆外）
   - Heap：堆内，Byte数组
-  - Direct：堆外，不归jvm管理，面向操作系统层面。在创建时其实在内部就是创建了一个java.nio.ByteBuffer，,然后后续操作都是操作这个ByteBuffer对象
+  - **Direct**：堆外，不归jvm管理，面向操作系统层面。在创建时其实在内部就是创建了一个**java.nio.ByteBuffer**，,然后后续操作都是操作这个ByteBuffer对象
 - 根据这三种分类依据进行全组合，得出总共有2的三次方种
 
 #####  类图
@@ -590,7 +590,7 @@ register()->>doBind():then
   - heapByteBuffer(initialCapacity:int):ByteBuf
   - directByteBuffer(initialCapacity:int):ByteBuf
 
-- netty获取ByteBuf时通过不同的类区分了Unpooled与Pooled、又通过不同的方法区分了heap与direct，那么Unsafe与非Unsafe是如何区分的呢？其实是在获取ByteBuf的方法内部通过代码区分的，通过**判断依赖的jdk中是否有Unsafe类**来选择获取**Unsafe**的ByteBuf还是**非Unsafe**的ByteBuf
+- netty获取ByteBuf时通过不同的类(UnpooledByteBufAllocator/PooledByteBufAllocator)区分了Unpooled与Pooled、又通过不同的方法区分了heap与direct，那么Unsafe与非Unsafe是如何区分的呢？其实是在获取ByteBuf的方法内部通过代码区分的，通过**判断依赖的jdk中是否有Unsafe类**来选择获取**Unsafe**的ByteBuf还是**非Unsafe**的ByteBuf
 
   - 以UnpooledByteBufAllocator.newHeapBuffer为例
 
