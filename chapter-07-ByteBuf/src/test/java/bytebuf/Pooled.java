@@ -16,6 +16,7 @@
 
 package bytebuf;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import org.junit.Test;
 
@@ -26,16 +27,28 @@ import org.junit.Test;
  * @date Created in 2019-07-28 19:36
  */
 public class Pooled {
-    
+
+    /**
+     * 从内存中分配一段subpage级别的内存
+     */
     @Test
     public void testSubPageMemory(){
         PooledByteBufAllocator allocator = PooledByteBufAllocator.DEFAULT;
-        allocator.directBuffer(16);
+        allocator.heapBuffer(16);
     }
-    
+
+    /**
+     * 从规格大小为tiny的缓存中取出一段16个字节（16B）的内存
+     */
     @Test
-    public void testTinyCache(){
-        
+    public void testTinyCache() throws InterruptedException {
+        PooledByteBufAllocator allocator = PooledByteBufAllocator.DEFAULT;
+        ByteBuf byteBuf1 = allocator.directBuffer(16);
+        System.out.println(byteBuf1.memoryAddress());
+        byteBuf1.release();
+        ByteBuf byteBuf2 = allocator.directBuffer(16);
+        System.out.println(byteBuf2.memoryAddress());
+
     }
     
     
