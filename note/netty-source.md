@@ -555,8 +555,8 @@ register()->>doBind():then
   - 非Unsafe：操作ByteBuf进行读写时，直接操作的Byte数组或java.nio.ByteBuffer
 - Heap与Direct（堆内与堆外）
   - Heap：堆内，Byte数组
-  - **Direct**：堆外，不归jvm管理，面向操作系统层面。在创建时其实在内部就是创建了一个**java.nio.ByteBuffer**，,然后后续操作都是操作这个ByteBuffer对象
-- 根据这三种分类依据进行全组合，得出总共有2的三次方种
+  - **Direct**：堆外，不归jvm管理，面向操作系统层面。在创建时其实在内部就是创建了一个**java.nio.ByteBuffer**，,然后后续操作内部都是操作这个ByteBuffer对象
+- 根据这三种分类依据进行全组合，得出总共有**2的三次方种**
 
 #####  类图
 
@@ -564,11 +564,11 @@ register()->>doBind():then
 
 ### 内存分配器ByteBufAllocator
 
-##### 概述
+##### 作用
 
-- 功能：用来获取一个ByteBuf对象
+- 用来获取一个ByteBuf对象
 
-##### 分类 
+##### 分类
 
 - ByteBufAllocator主要有两大子类
   - UnpooledByteBufAllocator
