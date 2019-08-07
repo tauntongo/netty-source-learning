@@ -49,7 +49,7 @@ public class Unpooled {
      * ByteBuf主要API使用
      */
     @Test
-    public void testUnpooledCommonUsage(){
+    public void testBasicUsage(){
         UnpooledByteBufAllocator allocator = UnpooledByteBufAllocator.DEFAULT;
         ByteBuf byteBuf = allocator.heapBuffer(1024);
         String writedStr =  "hello world!I'm your father.";

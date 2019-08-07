@@ -28,6 +28,12 @@ import org.junit.Test;
  */
 public class Pooled {
 
+    @Test
+    public void testBasicUsage(){
+        
+    }
+    
+    
     /**
      * 从内存中分配一段subpage级别的内存
      */
@@ -48,9 +54,11 @@ public class Pooled {
         byteBuf1.release();
         ByteBuf byteBuf2 = allocator.directBuffer(16);
         System.out.println(byteBuf2.memoryAddress());
+        ByteBuf byteBuf3 = allocator.directBuffer(16*1024*1024);
+        System.out.println(byteBuf3.memoryAddress());
+        ByteBuf byteBuf4 = allocator.directBuffer(16);
+        System.out.println(byteBuf4.memoryAddress());
 
     }
-    
-    
-    
+
 }

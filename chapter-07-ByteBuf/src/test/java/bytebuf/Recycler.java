@@ -34,8 +34,11 @@ public class Recycler {
 	@Test
 	public void testPooledMemoryRecycle(){
 		PooledByteBufAllocator pooledByteBufAllocator = PooledByteBufAllocator.DEFAULT;
-		ByteBuf byteBuf = pooledByteBufAllocator.heapBuffer(16);
-		byteBuf.release();
+		ByteBuf byteBuf1 = pooledByteBufAllocator.directBuffer(16);
+		System.out.println("byteBuf 1 memory address:"+ byteBuf1.memoryAddress());
+		byteBuf1.release();
+		ByteBuf byteBuf2 = pooledByteBufAllocator.directBuffer(16);
+		System.out.println("byteBuf 2 memory address:"+ byteBuf2.memoryAddress());
 	}
 
 }
