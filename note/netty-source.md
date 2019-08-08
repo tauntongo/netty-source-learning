@@ -571,7 +571,7 @@ register()->>doBind():then
 ##### 分类
 
 - ByteBufAllocator主要有两大子类
-  - UnpooledByteBufAllocator
+  - UnpooledByteBufAllocator：获取ByteBuf对象时都是直接新建一个返回
   - PooledByteBufAllocator
 - 类图
   - ![ByteBufAllocator-Class-Diagram](map-img/ByteBufAllocator-Class-Diagram.png)
@@ -602,7 +602,20 @@ register()->>doBind():then
           }
       ```
 
-      
+
+
+
+##### PooledByteBufAllocator详解
+
+- 通过PooledByteBufAllocator获取ByteBuf时，会通过以下四种组合方式中的一种，其优先级依次为
+  1. 从对象池（Recycler）里面拿到PooledByteBuf复用
+     1. 从缓存上进行内存分配
+     2. 从内存堆里面进行内存分配
+  2. 新建一个PooledByteBuf对象
+     1. 从缓存上进行内存分配
+     2. 从内存堆里面进行内存分配
+
+
 
 
 
