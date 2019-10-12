@@ -40,7 +40,7 @@ public class Pooled {
     @Test
     public void testSubPageMemory(){
         PooledByteBufAllocator allocator = PooledByteBufAllocator.DEFAULT;
-        allocator.heapBuffer(16);
+        allocator.directBuffer(16);
     }
 
     /**
