@@ -338,7 +338,7 @@ register()->>doBind():then
 
 ### 创建NioSocketChannel
 
-- 接上一步检测新连接中do...while循环体中的的doReadMessages中的new NioSocketChannel操作
+- **接上一步**检测新连接中do...while循环体中的的**doReadMessages**中的new NioSocketChannel操作
 
 - new NioSocketChannel(parent, ch)
   - 入参parent为服务端channel NioServerSocketChannel，ch为服务端jdk-channel accept之后获取到得到客户端channel
