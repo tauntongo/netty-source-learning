@@ -6,7 +6,7 @@
 
 ### Netty的基本组件
 
-- NioEventLoop（核心），程序运行在NioEventLoop之上。bossEventLoop用于事件的监听及处理，childEventLoop主要用于在事件处理完成之后运行与事件处理无关的task，有点后置处理器的意思
+- NioEventLoop（核心），程序运行在NioEventLoop之上。bossEventLoop用于新连接的监听及读写新连接，childEventLoop主要用于在接入新连接后的事件监听及读写数据
 - Channel：netty自定义的Channel，是对nio中的Channel的进一步封装
   - Unsafe:用于实现每一种Channel的读写抽象
   - Pipeline:负责处理该Channel的数据处理业务逻辑链（将Channel的不同阶段、不同事件、handler等串联起来执行），不进行实际操作，仅起串联作用
