@@ -12,12 +12,9 @@
     <description>netty源码解析学习</description>
     <modules>
         <module>chapter-01-socket</module>
-        <!--netty基本组件介绍-->
-        <module>chapter-02-component-introduction</module>
         <module>chapter-03-quick-start</module>
-        <module>chapter-04-nioEventLoop</module>
         <module>chapter-06-pipeline</module>
-        <module>chapter-07-ByteBuf</module>
+        <module>chapter-07-byteBuf</module>
     </modules>
 
     <properties>
@@ -41,18 +38,18 @@
         </dependencies>
     </dependencyManagement>
 
-    <build>
+<!--    <build>
         <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-compiler-plugin</artifactId>-->
-                <!--<configuration>-->
-                    <!--<source>1.8</source>-->
-                    <!--<compilerVersion>1.8</compilerVersion>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <compilerVersion>1.8</compilerVersion>
+                </configuration>
+            </plugin>
         </plugins>
-    </build>
+    </build>-->
 
 
 </project>

@@ -25,7 +25,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>chapter-07-ByteBuf</artifactId>
+    <artifactId>chapter-07-byteBuf</artifactId>
     <description>Netty底层的内存分配以及io.netty.buffer.ByteBuf的基本用法</description>
 
     <dependencies>
