@@ -1,7 +1,24 @@
 /*
- * Copyright (c) 2019. tangduns945@gmail.com.
+ *
+ *  * Copyright (c) 2020 tangduns945@gmail.com.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
  */
 
+package server;
+
+import java.nio.charset.StandardCharsets;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -10,17 +27,21 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 import io.netty.util.AttributeKey;
+import server.serverChannelHandler.ServerAcceptDataHandler;
+import server.serverChannelHandler.ServerAcceptDataResolveStickyPackHandler;
+import server.serverChannelHandler.ServerChannelInboundHandler;
 import org.junit.Test;
-import serverChannelHandler.ServerChannelInboundHandler;
 
 /**
- * <p></p>
+ * <p>netty服务端</p>
  *
- * @Author <a href="mailto:tangduns945@gmail.com">Taunton</a>
- * @Date Created in 2019-05-26 16:27
+ * @author <a href="mailto:tangduns945@gmail.com">Taunton</a>
+ * @date Created in 2019-05-26 16:27
  */
-public class StartServerDemo {
+public class ServerLauncherDemo {
 
     @Test
     public void server(){
@@ -31,6 +52,8 @@ public class StartServerDemo {
             b.group(serverGroup,childGroup)
                     .channel(NioServerSocketChannel.class)
                     // 对服务端Channel NioServerSocketChannel的配置，可通过多次调用设置多个
+                     //请求句柄数组积压长度
+                    .option(ChannelOption.SO_BACKLOG, 1024)
                     //.option()
                     //.option()
                     // 对服务端Channel NioServerSocketChannel的属性设置，可通过多次调用设置多个
@@ -38,6 +61,7 @@ public class StartServerDemo {
                     //.attr()
                     //对accept到的SocketChannel的配置，主要是和底层TCP读写相关的配置，每次accept到SocketChannel都会按照我们所传的配置项配置一遍
                     .childOption(ChannelOption.TCP_NODELAY, true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     //对accept到的SocketChannel的属性设置，为了可以在客户端channel绑定一些自定义的属性如秘钥、存活时间之类的，
                     // 每次accept到SocketChannel都会按照我们所传的属性设置一遍
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
@@ -62,6 +86,12 @@ public class StartServerDemo {
                     .childHandler(new ChannelInitializer<NioSocketChannel>() {
                         protected void initChannel(NioSocketChannel ch) throws Exception {
                             //可以在这这这里加上众多的handler介入对accept到的Channel的处理
+                            //存在粘包问题
+                            //ch.pipeline().addLast(new ServerAcceptDataHandler());
+                            //解决了粘包问题
+                            ch.pipeline().addLast(new LineBasedFrameDecoder(1024*1024));
+                            ch.pipeline().addLast(new StringDecoder(StandardCharsets.UTF_8));
+                            ch.pipeline().addLast(new ServerAcceptDataResolveStickyPackHandler());
                             //ch.pipeline().addLast()
                             //ch.pipeline().addLast()
                             //ch.pipeline().addAfter()
