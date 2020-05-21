@@ -28,14 +28,6 @@ public class SimpleTest {
     }
 
     @Test
-    public void testAssert(){
-        String str = null;
-        assert str != null;
-        System.out.println("assert str == null successful");
-
-    }
-
-    @Test
     public void testNanoTime(){
         long currentNanoTime = System.nanoTime();
         long currentTimeMillis = System.currentTimeMillis();
