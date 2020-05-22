@@ -37,8 +37,11 @@ public class ClientSendandAcceptDataNonStickyHandler extends SimpleChannelInboun
         for (int i = 0; i < 100; i++) {
             //直接这样发送小数据包会发生粘包 因为小于TCP缓冲区大小，会堆积后TCP将多次写入TCP缓冲区中的数据一次性发送出去
             req = Unpooled.copiedBuffer(("你是谁" + System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8));
+            //req = Unpooled.copiedBuffer(("你是谁" + System.getProperty("line.separator") + System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8));
             //req = UnpooledByteBufAllocator.DEFAULT.buffer(1024*1024).writeBytes(("我爱你" + System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8));
-            ctx.writeAndFlush(req);
+            //ctx.writeAndFlush(req);
+            //ctx.channel().writeAndFlush(req); 与下一条等效
+            ctx.pipeline().writeAndFlush(req);
         }
     }
 

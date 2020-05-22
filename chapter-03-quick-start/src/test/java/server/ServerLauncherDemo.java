@@ -30,8 +30,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.util.AttributeKey;
-import server.serverChannelHandler.ServerAcceptDataNonStickyHandler;
-import server.serverChannelHandler.ServerChannelInboundHandler;
+import server.serverChannelHandler.BossChannelOutboundHandler;
+import server.serverChannelHandler.ChildAcceptDataNonStickyHandler;
+import server.serverChannelHandler.BossChannelInboundHandler;
+import server.serverChannelHandler.ChildChannelOutboundHandler;
 import org.junit.Test;
 
 /**
@@ -44,11 +46,11 @@ public class ServerLauncherDemo {
 
     @Test
     public void server(){
-        final EventLoopGroup serverGroup = new NioEventLoopGroup(1);
+        final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         final EventLoopGroup childGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
-            b.group(serverGroup,childGroup)
+            b.group(bossGroup,childGroup)
                     .channel(NioServerSocketChannel.class)
                     // 对服务端Channel NioServerSocketChannel的配置，可通过多次调用设置多个
                      //请求句柄数组积压长度
@@ -68,13 +70,14 @@ public class ServerLauncherDemo {
                     //为服务端设置ChannelHandler这里我们传入的是一个继承了ChannelInboundHandlerAdapter的自定义handler对象
                     //我们对于netty处理流程中接入一般都是在handler中实现，netty已经定义了基本的ChannelHandler接口、抽象类、以及众多实现类，
                     //我们既可以使用既有的ChannelHandler实现，亦可实现或继承自定义ChannelHandler。
-                    .handler(new ServerChannelInboundHandler())
-                    //.handler(new ChannelInitializer<NioServerSocketChannel>() {
-                    //    @Override
-                    //    protected void initChannel(NioServerSocketChannel ch) throws Exception {
-                    //        ch.pipeline().addLast()
-                    //    }
-                    //})
+                    //.handler(new BossChannelInboundHandler())
+                    .handler(new ChannelInitializer<NioServerSocketChannel>() {
+                        @Override
+                        protected void initChannel(NioServerSocketChannel ch) throws Exception {
+                            ch.pipeline().addLast(new BossChannelInboundHandler());
+                            ch.pipeline().addLast(new BossChannelOutboundHandler());
+                        }
+                    })
 
                     //为新连接设置ChannelHandler，我们如果要写业务代码一般也就是写在handler里面了。
                     //请注意：这是一个比较特殊的ChannelHandler抽象实现类，因为其本身并没有任何业务处理代码，当这个ChannelHandler的handlerAdded
@@ -90,7 +93,7 @@ public class ServerLauncherDemo {
                             //解决了粘包问题
                             ch.pipeline().addLast(new LineBasedFrameDecoder(1024*1024));
                             ch.pipeline().addLast(new StringDecoder(StandardCharsets.UTF_8));
-                            ch.pipeline().addLast(new ServerAcceptDataNonStickyHandler());
+                            ch.pipeline().addLast(new ChildAcceptDataNonStickyHandler());
                             //ch.pipeline().addLast()
                             //ch.pipeline().addLast()
                             //ch.pipeline().addAfter()
@@ -98,18 +101,18 @@ public class ServerLauncherDemo {
                     });
 
             //启动Netty服务端
-            ChannelFuture channelFuture = b.bind(8848).sync();
-            System.out.println("bind port sync over");
+            //sync() 作用：阻塞主线程直到bind future被回调到 done
+            ChannelFuture channelFuture = b.bind(8848).addListener(f -> System.out.println("netty服务启动成功！！！")).sync();
             //serverGroup.next().execute(() -> {
             //    System.out.println("test server eventLoop execute");
             //});
-            channelFuture.channel().closeFuture().sync();
-            System.out.println("channelFuture sync over");
+            //sync 阻塞主线程直到channel close future被回调到 done
+            channelFuture.channel().closeFuture().addListener(f -> System.out.println("netty服务关闭！！！")).sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             //优雅的关闭
-            serverGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
             childGroup.shutdownGracefully();
             //childGroup.shutdownGracefully(1000,3000, TimeUnit.MILLISECONDS);
         }

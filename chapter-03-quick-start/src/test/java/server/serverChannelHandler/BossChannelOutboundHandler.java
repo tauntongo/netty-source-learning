@@ -29,17 +29,17 @@ import io.netty.channel.ChannelPromise;
  * @date Created in 2019-06-24 14:21
  * @since
  */
-public class ServerChannelOutboundHandler extends ChannelOutboundHandlerAdapter {
+public class BossChannelOutboundHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void read(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("read event");
+        System.out.println("boss read event");
         super.read(ctx);
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        System.out.println("read event");
+        System.out.println("boss read event");
         super.write(ctx, msg, promise);
     }
 }

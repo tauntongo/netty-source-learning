@@ -19,7 +19,10 @@
 package client;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import client.channelHandler.ClientChannelOutboundHandler;
+import client.channelHandler.ClientSendAndAcceptDataHandler;
 import client.channelHandler.ClientSendandAcceptDataNonStickyHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -63,11 +66,14 @@ public class ClientLauncherDemo {
                  }
              });
             //连接指定ip的指定端口
-            ChannelFuture channelFuture = b.connect("127.0.0.1", 8848).sync();
-            System.out.println("连接目标服务器成功！！！");
-            ChannelFuture channelFuture1 = channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(("试试就试试" + System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8)));
+            //sync() 作用：阻塞主线程直到connect完成（future done）
+            ChannelFuture channelFuture = b.connect("127.0.0.1", 8848).addListener(f -> System.out.println("连接目标服务器成功！！！")).sync();
+            //TimeUnit.SECONDS.sleep(10);
+            //ChannelFuture channelFuture1 = channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(("试试就试试" + System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8)));
+            //channelFuture1.addListener(f -> System.out.println("试试就试试的结果 ： " + f.isDone() + " " + f.isSuccess()));
                 //ChannelFuture channelFuture2 = b.connect("127.0.0.1", 8848).sync();
                 //System.out.println("连接目标服务器成功2！！！");
+            //sync 阻塞主线程直到channel close（future done）
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
