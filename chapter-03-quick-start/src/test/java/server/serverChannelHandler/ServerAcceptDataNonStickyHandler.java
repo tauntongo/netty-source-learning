@@ -31,7 +31,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  *@since
  *@date Created in 2020-05-21 4:24 下午
  */
-public class ServerAcceptDataResolveStickyPackHandler extends SimpleChannelInboundHandler<String> {
+public class ServerAcceptDataNonStickyHandler extends SimpleChannelInboundHandler<String> {
 
     //计数器
     private final AtomicInteger counter = new AtomicInteger();

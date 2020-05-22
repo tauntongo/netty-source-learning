@@ -30,8 +30,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.util.AttributeKey;
-import server.serverChannelHandler.ServerAcceptDataHandler;
-import server.serverChannelHandler.ServerAcceptDataResolveStickyPackHandler;
+import server.serverChannelHandler.ServerAcceptDataNonStickyHandler;
 import server.serverChannelHandler.ServerChannelInboundHandler;
 import org.junit.Test;
 
@@ -91,7 +90,7 @@ public class ServerLauncherDemo {
                             //解决了粘包问题
                             ch.pipeline().addLast(new LineBasedFrameDecoder(1024*1024));
                             ch.pipeline().addLast(new StringDecoder(StandardCharsets.UTF_8));
-                            ch.pipeline().addLast(new ServerAcceptDataResolveStickyPackHandler());
+                            ch.pipeline().addLast(new ServerAcceptDataNonStickyHandler());
                             //ch.pipeline().addLast()
                             //ch.pipeline().addLast()
                             //ch.pipeline().addAfter()

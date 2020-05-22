@@ -20,6 +20,7 @@ package server.serverChannelHandler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 
 /**
  * <p></p>
@@ -29,8 +30,16 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
  * @since
  */
 public class ServerChannelOutboundHandler extends ChannelOutboundHandlerAdapter {
+
     @Override
     public void read(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("read event");
         super.read(ctx);
+    }
+
+    @Override
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        System.out.println("read event");
+        super.write(ctx, msg, promise);
     }
 }

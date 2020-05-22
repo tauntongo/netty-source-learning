@@ -30,7 +30,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  *@since
  *@date Created in 2020-05-21 4:21 下午
  */
-public class ClientSendandAcceptDataResolveStickyPackHandler extends SimpleChannelInboundHandler<String> {
+public class ClientSendandAcceptDataNonStickyHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         ByteBuf req = null;

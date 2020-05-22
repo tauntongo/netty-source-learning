@@ -20,7 +20,7 @@ package client;
 
 import java.nio.charset.StandardCharsets;
 import org.junit.Test;
-import client.channelHandler.ClientSendandAcceptDataResolveStickyPackHandler;
+import client.channelHandler.ClientSendandAcceptDataNonStickyHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -59,7 +59,7 @@ public class ClientLauncherDemo {
                      //解决了粘包问题
                      ch.pipeline().addLast(new LineBasedFrameDecoder(1024*1024));
                      ch.pipeline().addLast(new StringDecoder(StandardCharsets.UTF_8));
-                     ch.pipeline().addLast(new ClientSendandAcceptDataResolveStickyPackHandler());
+                     ch.pipeline().addLast(new ClientSendandAcceptDataNonStickyHandler());
                  }
              });
             //连接指定ip的指定端口
