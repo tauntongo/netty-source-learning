@@ -24,7 +24,7 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 /**
  *<p></p>
- *@author <a href="mailto:tangdong@supermonkey.com.cn">tangdong</a>
+ *@author <a href="mailto:tangduns945@gmail.com">Taunton</a>
  *@version
  *@since
  *@date Created in 2020-05-22 2:48 下午

@@ -26,7 +26,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 /**
  *<p>服务端接收请求数据channelHandler</p>
- *@author <a href="mailto:tangdong@supermonkey.com.cn">tangdong</a>
+ *@author <a href="mailto:tangduns945@gmail.com">Taunton</a>
  *@version
  *@since
  *@date Created in 2020-05-21 3:11 下午

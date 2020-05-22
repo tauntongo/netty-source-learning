@@ -26,7 +26,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 /**
  *<p>解决粘包问题的服务端handler/p>
- *@author <a href="mailto:tangdong@supermonkey.com.cn">tangdong</a>
+ *@author <a href="mailto:tangduns945@gmail.com">Taunton</a>
  *@version
  *@since
  *@date Created in 2020-05-21 4:24 下午
