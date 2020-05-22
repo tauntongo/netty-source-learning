@@ -68,13 +68,13 @@ public class InboundChannelHandlerTestDemo {
                     });
 
             //启动Netty服务端
-            ChannelFuture channelFuture = b.bind(8848).sync();
-            System.out.println("bind port sync over");
+            //sync() 作用：阻塞主线程直到bind future被回调到 done
+            ChannelFuture channelFuture = b.bind(8848).addListener(f -> System.out.println("netty服务启动成功！！！")).sync();
             //serverGroup.next().execute(() -> {
             //    System.out.println("test server eventLoop execute");
             //});
-            channelFuture.channel().closeFuture().sync();
-            System.out.println("channelFuture sync over");
+            //sync 阻塞主线程直到boss channel close future被回调到 done
+            channelFuture.channel().closeFuture().addListener(f -> System.out.println("netty服务关闭！！！")).sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -457,13 +457,13 @@ register()->>doBind():then
 
 - 是Pipeline中的一个内部类
 - 其inbound属性为false，outbound属性为true，因此这是一个处理outbound事件的handler
-- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其既具有传播事件的功能又具有事件触发后实际执行者的功能
+- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其**既具有传播事件的功能又具有事件触发后实际执行者的功能**
 
 ##### TailContext
 
 - 是Pipeline中的一个内部类
 - 其inbound属性为true，outbound属性为false，因此这是一个处理inbound事件的handler
-- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其既具有传播事件的功能又具有事件触发后实际执行者的功能
+- 实现了ChannelHandlerContext与ChannelHandler两个接口，因而其**既具有传播事件的功能又具有事件触发后实际执行者的功能**
 
 ### Inbound事件与Outbound事件
 
