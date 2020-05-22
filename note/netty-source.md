@@ -494,6 +494,19 @@ register()->>doBind():then
 
 
 
+### 疑问？
+
+在Pipeline中为何Inbound类型事件和Outbound类型事件的触发要分成两种方式？
+
+*Inbound类型的事件触发会先调用一遍HeadContext节点的ChannelInboundHandler实现方法然后再传播到HeadContext的下一节点*
+
+*Outbound类型的事件触发不会调用到TailContext节点的ChannelOutboundHandler实现方法，而是直接传播到TailContext的上一节点*
+
+- <img src="img/2020-05-22-why-fire-inbound-handler-event-in-this-way.png" alt="2020-05-22-why-fire-inbound-handler-event--in-this-way" style="zoom:40%;" />
+- <img src="img/2020-05-22-why-fire-outbound-handler-event-in-this-way.png" alt="2020-05-22-why-fire-inbound-handler-event--in-this-way" style="zoom:40%;" />
+
+
+
 
 
 # Chapter-07-ByteBuf
