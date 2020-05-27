@@ -630,13 +630,22 @@ register()->>doBind():then
 
 
 
-
-
-
-
 ### 三个问题
 
 - 内存的类别有哪些？
   - subpage/page/chunk
 - 如何减少多线程内存分配之间的竞争？
 - 不同大小的内存是如何进行分配的？
+
+
+
+# chapter-08-解码器
+
+# chapter-09-编码器
+
+# chapter-10-性能优化工具
+
+# chapter-11-设计模式的应用
+
+# chapter-12-性能调优
+
