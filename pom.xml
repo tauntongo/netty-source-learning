@@ -15,6 +15,10 @@
         <module>chapter-03-quick-start</module>
         <module>chapter-06-pipeline</module>
         <module>chapter-07-byteBuf</module>
+        <module>chapter-08-decoder</module>
+        <module>chapter-09-encoder</module>
+        <module>chapter-10-performance-optimization-tool</module>
+        <module>chapter-12-performance-tuning</module>
     </modules>
 
     <properties>
