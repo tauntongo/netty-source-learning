@@ -645,6 +645,15 @@ register()->>doBind():then
 
 # chapter-10-性能优化工具
 
+### FastThreadLocal
+
+|                 | 相同点                                                       | 不同点                                                       |
+| --------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| FastThreadLocal | 1. InternalThreadLocalMap/ThreadLocalMap对象都是存储在Thread中<br />2. InternalThreadLocalMap/ThreadLocalMap内部都是纯数组的数据结构，没有链表，为了提高查找效率 | 1. 每个FastThreadLocal创建时都会被分配一个编号，后续查找的时候通过此编号直接在InternalThreadLocalMap的数组中作为索引定位<br />2. FastThreadLocalMap中的数组可以进行扩容<br />3. InternalThreadLocalMap数组中的元素为Object |
+| ThreadLocal     |                                                              | 1. 在ThreadLocalMap中的查找定位时索引值的获取是通过ThreadLoca的hash值与ThreadLocalMap中数组长度计算出来的<br />2. ThreadLocalMap中的数组不能进行扩容，当数组已满时会反复遍历数组，直到有元素（Entry为WeakReference，当key为null）被回收才能填充新Entry进去<br />3. ThreadLocalMap数组中的元素为Entry继承自WeakReference |
+
+
+
 # chapter-11-设计模式的应用
 
 # chapter-12-性能调优
