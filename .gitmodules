@@ -1,0 +1,3 @@
+[submodule "netty"]
+	path = netty
+	url = git@github.com:tauntongo/netty.git
