@@ -67,7 +67,13 @@ public class ClientLauncherDemo {
              });
             //连接指定ip的指定端口
             //sync() 作用：阻塞主线程直到connect完成（future done）
-            ChannelFuture channelFuture = b.connect("127.0.0.1", 8848).addListener(f -> System.out.println("连接目标服务器成功！！！")).sync();
+            ChannelFuture channelFuture = b.connect("127.0.0.1", 8848).addListener(f -> {
+                if(f.isSuccess()){
+                    System.out.println("连接目标服务器成功！！！");
+                }else {
+                    System.out.println("连接目标服务器失败！！！");
+                }
+                }).sync();
             //TimeUnit.SECONDS.sleep(10);
             //ChannelFuture channelFuture1 = channelFuture.channel().writeAndFlush(Unpooled.copiedBuffer(("试试就试试" + System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8)));
             //channelFuture1.addListener(f -> System.out.println("试试就试试的结果 ： " + f.isDone() + " " + f.isSuccess()));
