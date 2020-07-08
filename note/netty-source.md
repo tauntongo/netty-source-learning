@@ -20,7 +20,7 @@
 ### QuickStart-启动一个Netty服务端
 
 ```java
-public class InboundChannelHandlerTestDemo {
+public class top.taunton.netty_source_ok.InboundChannelHandlerTestDemo {
 
     @Test
     public void server(){
@@ -445,7 +445,7 @@ register()->>doBind():then
 - channelHandler是逻辑链中每一个节点其事件触发后的实际执行者
 - 大体上分为两类InboundHandler、OutboundHandler，分别对应着inbound事件的处理、outbound事件的处理
 - **ChannelHandler.@Sharble**注解：被添加到pipeline的channelHandler会检查其类是否被@Sharable注解修饰，若没有，则一个pipeline中同一个handler对象只能被添加一次，否则会抛出异常
-- SimpleChannelInboundHandler：netty中经过包装的一个inboundHandler，其实现了channelRead方法，在内部帮我们进行了缓冲区的释放，从而我们不必多些代码去做缓冲区的释放，我们只需要去实现channelRead0这个抽象方法即可。[用法](https://github.com/tauntongo/netty-source-analysis-learning-sample/blob/master/chapter-06-pipeline/src/test/java/childChannelHandler/AuthChannelHandler.java)
+- SimpleChannelInboundHandler：netty中经过包装的一个inboundHandler，其实现了channelRead方法，在内部帮我们进行了缓冲区的释放，从而我们不必多些代码去做缓冲区的释放，我们只需要去实现channelRead0这个抽象方法即可。[用法](https://github.com/tauntongo/netty-source-ok/blob/master/chapter-06-pipeline/src/test/java/childChannelHandler/AuthChannelHandler.java)
 
 ##### ChannelHandlerContext
 

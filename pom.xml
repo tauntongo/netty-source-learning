@@ -10,14 +10,12 @@
     <version>1.0.0</version>
     <description>netty源码解析学习</description>
     <modules>
-        <module>chapter-01-socket</module>
-        <module>chapter-03-quick-start</module>
-        <module>chapter-06-pipeline</module>
-        <module>chapter-07-byteBuf</module>
-        <module>chapter-08-decoder</module>
-        <module>chapter-09-encoder</module>
-        <module>chapter-10-performance-optimization-tool</module>
-        <module>chapter-12-performance-tuning</module>
+        <module>chapter-01-quickStart</module>
+        <module>chapter-02-channelHandler</module>
+        <module>chapter-03-byteBuf</module>
+        <module>chapter-04-codec</module>
+        <module>chapter-05-performanceOptimizationTool</module>
+        <module>chapter-06-performanceTuning</module>
     </modules>
 
     <properties>
@@ -41,7 +39,7 @@
         </dependencies>
     </dependencyManagement>
 
-<!--    <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -52,7 +50,7 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>-->
+    </build>
 
 
 </project>
