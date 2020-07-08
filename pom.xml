@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>top.taunton</groupId>
-    <artifactId>netty-source-analysis-learning-sample</artifactId>
+    <artifactId>netty-source-ok</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0</version>
     <description>netty源码解析学习</description>
