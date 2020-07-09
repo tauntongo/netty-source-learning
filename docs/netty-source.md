@@ -112,11 +112,11 @@ register()->>doBind():then
 - 具体创建的流程
 
   - newSocket()：通过jdk来创建底层jdk channel
-    - ![2019-05-26-2.1-newSocket()](img/2019-05-26-2.1-newSocket().png)
+    - ![2019-05-26-2.1-newSocket()](images/2019-05-26-2.1-newSocket().png)
   - AbstractNioChannel()
     - AbstractChannel()：创建id，unsafe，pipeline
     - SelectableChannel.configureBlocking(false)：jdk底层channel配置阻塞模式
-    - ![2019-05-26-2.2-AbstractNioChannel()](img/2019-05-26-2.2-AbstractNioChannel().png)
+    - ![2019-05-26-2.2-AbstractNioChannel()](images/2019-05-26-2.2-AbstractNioChannel().png)
   - new NioServerSocketChannelConfig()：tcp参数配置类。通过ServerBootstrap.option()保存的参数最终会被设置到此配置对象中去
 
 
@@ -140,7 +140,7 @@ register()->>doBind():then
     - childGroup、childHandler、childOptions、childAttrs：获取到对客户端Channel的各种配置，用来在后面第四步传入连接器中；childOptions主要是和弟底层tcp读写相关的配置，childAttrs主要是为了可以在channel上绑定一些自定义的属性，如该chanel的秘钥、存活时间之类的
     - add ServerBootstrapAcceptor：添加连接器（每次accept到SocketChannel后使用用户配置的childGroup、childHandler、childOptions、childAttrs作为其配置）
     - 源码：
-      - ![2019-05-27-1-ServerBootstrap.init()](img/2019-05-27-1-ServerBootstrap.init().png)
+      - ![2019-05-27-1-ServerBootstrap.init()](images/2019-05-27-1-ServerBootstrap.init().png)
 
 ##### 注册到selector
 
@@ -161,8 +161,8 @@ register()->>doBind():then
         - invokeHandlerAddedIfNeeded()：回调执行handler中的handlerAdded(ChannelHandlerContext ctx)
         - fireChannelRegistered()：传播channel注册事件，可以让如我们添加的自定义handler感知
     - 部分源码流程：
-      - ![2019-06-02-01AbstractChanel.register](img/2019-06-02-01AbstractChanel.register.png)
-      - ![2019-06-02-02-Abstractchannel.regist0](img/2019-06-02-02-Abstractchannel.regist0.png)
+      - ![2019-06-02-01AbstractChanel.register](images/2019-06-02-01AbstractChanel.register.png)
+      - ![2019-06-02-02-Abstractchannel.regist0](images/2019-06-02-02-Abstractchannel.regist0.png)
 
 
 
@@ -187,7 +187,7 @@ register()->>doBind():then
       - javaChannel().bind()：调用jdk底层nio接口ServerSocketChannel绑定端口
     - pipeline.fireChannelActive()：传播channelActive事件，在传播的时候在头节点HeadContext节点的channelActive方法实现中会设置selectionKey的interestOps为OP_READ
   - 部分步骤源码：
-    - ![2019-06-04-01-bind](img/2019-06-04-01-bind.png)
+    - ![2019-06-04-01-bind](images/2019-06-04-01-bind.png)
 
 # Chapter-04(NioEventLoop)
 
@@ -197,19 +197,19 @@ register()->>doBind():then
 
 ### NioEventLoopGroup继承层级结构
 
-- ![NioEventLoopGroup类图](map-img/NioEventLoopGroup-Class-Diagram.png)
+- ![NioEventLoopGroup类图](map-images/NioEventLoopGroup-Class-Diagram.png)
 
 ### NioEventLoop的继承层级结构
 
-- ![NioEventLoop类图](map-img/NioEventLoop-Class-Diagram.png)
+- ![NioEventLoop类图](map-images/NioEventLoop-Class-Diagram.png)
 
 ### NioEventLoop创建时序图
 
-- ![NioEventLoop创建流程图](map-img/NioEventLoop-Create-Timing-Diagram.png)
+- ![NioEventLoop创建流程图](map-images/NioEventLoop-Create-Timing-Diagram.png)
 
 ### NioEventLoop启动运行时序图
 
-![NioEventLoop-Start-Running-Timing-Diagram](map-img/NioEventLoop-Start-Running-Timing-Diagram.png)
+![NioEventLoop-Start-Running-Timing-Diagram](map-images/NioEventLoop-Start-Running-Timing-Diagram.png)
 
 
 
@@ -376,9 +376,9 @@ register()->>doBind():then
 - 相同
   - Pipeline：负责处理该channel的数据处理业务逻辑链
 - Channel类图
-  - ![Channel-Simple-Class-Diagram](map-img/Channel-Simple-Class-Diagram.png)
+  - ![Channel-Simple-Class-Diagram](map-images/Channel-Simple-Class-Diagram.png)
 - ChannelConfig类图
-  - ![Channel-Simple-Class-Diagram](map-img/ChannelConfig-Simple-Class-Diagram.png)
+  - ![Channel-Simple-Class-Diagram](map-images/ChannelConfig-Simple-Class-Diagram.png)
 
 ### ServerBootstrapAcceptor
 
@@ -416,13 +416,13 @@ register()->>doBind():then
 
 - pipeline中所说的**逻辑链**实质上是一个**双向链表的结构**，固定以Pipeine.HeadContext开头，以Pipeline.TailContext结尾，中间的链表元素则是我们添加进去的经过包装后(ChannelHandlerContext)的ChannelHandler
 - 每一个节点元素对象都有next、prev这两个属性，从而形成双向链表
-- ![2019-07-10-01-异常事件的传播](img/2019-07-10-01-异常事件的传播.png)
+- ![2019-07-10-01-异常事件的传播](images/2019-07-10-01-异常事件的传播.png)
 
 ### 关键类类图
 
 ##### ChannelHandler接口
 
-- ![ChannelHandler-Class-Diagram](map-img/ChannelHandler-Class-Diagram.png)
+- ![ChannelHandler-Class-Diagram](map-images/ChannelHandler-Class-Diagram.png)
 
 
 
@@ -502,8 +502,8 @@ register()->>doBind():then
 
 *Outbound类型的事件触发不会调用到TailContext节点的ChannelOutboundHandler实现方法，而是直接传播到TailContext的上一节点*
 
-- <img src="img/2020-05-22-why-fire-inbound-handler-event-in-this-way.png" alt="2020-05-22-why-fire-inbound-handler-event--in-this-way" style="zoom:40%;" />
-- <img src="img/2020-05-22-why-fire-outbound-handler-event-in-this-way.png" alt="2020-05-22-why-fire-inbound-handler-event--in-this-way" style="zoom:40%;" />
+- <img src="images/2020-05-22-why-fire-inbound-handler-event-in-this-way.png" alt="2020-05-22-why-fire-inbound-handler-event--in-this-way" style="zoom:40%;" />
+- <img src="images/2020-05-22-why-fire-outbound-handler-event-in-this-way.png" alt="2020-05-22-why-fire-inbound-handler-event--in-this-way" style="zoom:40%;" />
 
 
 
@@ -573,7 +573,7 @@ register()->>doBind():then
 
 #####  类图
 
-- ![ByteBuf-Class-Diagram.png](map-img/ByteBuf-Class-Diagram.png)
+- ![ByteBuf-Class-Diagram.png](map-images/ByteBuf-Class-Diagram.png)
 
 ### 内存分配器ByteBufAllocator
 
@@ -587,7 +587,7 @@ register()->>doBind():then
   - UnpooledByteBufAllocator：获取ByteBuf对象时都是直接新建一个返回
   - PooledByteBufAllocator
 - 类图
-  - ![ByteBufAllocator-Class-Diagram](map-img/ByteBufAllocator-Class-Diagram.png)
+  - ![ByteBufAllocator-Class-Diagram](map-images/ByteBufAllocator-Class-Diagram.png)
 
 
 
