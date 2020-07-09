@@ -197,15 +197,15 @@ register()->>doBind():then
 
 ### NioEventLoopGroup继承层级结构
 
-- ![NioEventLoopGroup类图](map-img/NioEventLoopGroup类图.png)
+- ![NioEventLoopGroup类图](map-img/NioEventLoopGroup-Class-Diagram.png)
 
 ### NioEventLoop的继承层级结构
 
-- ![NioEventLoop类图](map-img/NioEventLoop类图.png)
+- ![NioEventLoop类图](map-img/NioEventLoop-Class-Diagram.png)
 
 ### NioEventLoop创建时序图
 
-- ![NioEventLoop创建流程图](map-img/NioEventLoop创建流程.png)
+- ![NioEventLoop创建流程图](map-img/NioEventLoop-Create-Timing-Diagram.png)
 
 ### NioEventLoop启动运行时序图
 
